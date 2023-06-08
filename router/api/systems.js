@@ -90,6 +90,7 @@ module.exports = (router) => {
       fleetCarriers = null
     } = ctx.query
     if (maxDistance > MAX_NEAREST_SYSTEMS_DISTANCE) { maxDistance = MAX_NEAREST_SYSTEMS_DISTANCE }
+    maxDistance = parseInt(maxDistance)
 
     const { systemAddress, systemX, systemY, systemZ } = await getSystemByName(systemName)
 
@@ -111,6 +112,7 @@ module.exports = (router) => {
         ROUND(SQRT(POWER(systemX-@systemX,2)+POWER(systemY-@systemY,2)+POWER(systemZ-@systemZ,2))) AS distance
       FROM commodities WHERE
         commodityName = @commodityName COLLATE NOCASE
+        AND SQRT(POWER(systemX-@systemX,2)+POWER(systemY-@systemY,2)+POWER(systemZ-@systemZ,2)) < @maxDistance
         ${filters.join(' ')}
       ORDER BY sellPrice DESC
         LIMIT ${MAX_NEAREST_COMMODITY_RESULTS}`, {
@@ -118,7 +120,7 @@ module.exports = (router) => {
       systemX,
       systemY,
       systemZ,
-      maxDistance: parseInt(maxDistance)
+      maxDistance
     })
 
     ctx.body = commodities || 'Commodity not found'
@@ -157,6 +159,7 @@ module.exports = (router) => {
         ROUND(SQRT(POWER(systemX-@systemX,2)+POWER(systemY-@systemY,2)+POWER(systemZ-@systemZ,2))) AS distance
       FROM commodities WHERE
         commodityName = @commodityName COLLATE NOCASE
+        AND SQRT(POWER(systemX-@systemX,2)+POWER(systemY-@systemY,2)+POWER(systemZ-@systemZ,2)) < @maxDistance
         ${filters.join(' ')}
       ORDER BY buyPrice ASC
         LIMIT ${MAX_NEAREST_COMMODITY_RESULTS}`, {
@@ -191,7 +194,8 @@ module.exports = (router) => {
     const nearestSystems = await systemsDbAsync.all(`
       SELECT
         *,
-        ROUND(SQRT(POWER(systemX-@systemX,2)+POWER(systemY-@systemY,2)+POWER(systemZ-@systemZ,2))) AS distance FROM systems
+        ROUND(SQRT(POWER(systemX-@systemX,2)+POWER(systemY-@systemY,2)+POWER(systemZ-@systemZ,2))) AS distance
+      FROM systems
       WHERE systemSector IN ('${nearbySectors.join("', '")}')
         AND SQRT(POWER(systemX-@systemX,2)+POWER(systemY-@systemY,2)+POWER(systemZ-@systemZ,2)) < @maxDistance
       ORDER BY distance
