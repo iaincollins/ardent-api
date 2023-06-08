@@ -1,0 +1,35 @@
+# This deployment script assumes the following are configured in GitHub actions:
+# SSH_PRIVATE_KEY [secret]
+# DEPLOY_HOST [variable]
+# DEPLOY_USER [variable]
+# DEPLOY_DIR [variable]
+name: Deploy Ardent API to Production
+
+on:
+  push:
+    branches: [ "main" ]
+
+env:
+  SERVICE_NAME: ${{ github.event.repository.name }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Deploy to Server
+      uses: easingthemes/ssh-deploy@main
+      env:
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        ARGS: "-rlgoDzvc -i --delete"
+        SOURCE: "./"
+        REMOTE_HOST: ${{ vars.DEPLOY_HOST }}
+        REMOTE_USER: ${{ vars.DEPLOY_USER }}
+        TARGET: "${{ vars.DEPLOY_DIR }}/${{ env.SERVICE_NAME }}"
+        EXCLUDE: ".git*, *.md, LICENSE, node_modules/"
+        SCRIPT_AFTER: |
+          cd "${{ vars.DEPLOY_DIR }}/${{ env.SERVICE_NAME }}"
+          npm install
+          pm2 restart "${{ env.SERVICE_NAME }}" --cron-restart="0 8 * * *"
+          pm2 save
+          echo $RSYNC_STDOUT
