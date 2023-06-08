@@ -31,5 +31,4 @@ jobs:
           cd "${{ vars.DEPLOY_DIR }}/${{ env.SERVICE_NAME }}"
           npm install
           pm2 restart "${{ env.SERVICE_NAME }}" --cron-restart="0 8 * * *"
-          pm2 save
           echo $RSYNC_STDOUT

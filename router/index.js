@@ -8,9 +8,7 @@ const { ARDENT_API_HOSTNAME, ARDENT_DATA_DIR } = require('../lib/consts')
 
 const router = new KoaRouter()
 
-router.get('/api', async (ctx, next) => ctx.redirect(`${ARDENT_API_HOSTNAME}/v1/stats`))
-
-router.get('/api/v1', async (ctx, next) => ctx.redirect(`${ARDENT_API_HOSTNAME}/v1/stats`))
+router.get('/api/v1', async (ctx, next) => ctx.redirect(`https://${ARDENT_API_HOSTNAME}/v1/stats`))
 
 router.get('/api/v1/stats', async (ctx, next) => {
   ctx.body = JSON.parse(fs.readFileSync(path.join(ARDENT_DATA_DIR, 'stats.json')))

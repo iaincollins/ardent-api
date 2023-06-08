@@ -33,6 +33,7 @@ const router = require('./router')
   })
 
   router.get('/', (ctx) => { ctx.body = printStats() })
+  router.get('/api', (ctx) => { ctx.body = printStats() })
   app.use(router.routes())
 
   app.listen(ARDENT_API_LOCAL_PORT)
