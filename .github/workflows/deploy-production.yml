@@ -1,9 +1,16 @@
-# This deployment script assumes the following are configured in GitHub actions:
-# SSH_PRIVATE_KEY [secret]
-# DEPLOY_HOST [variable]
-# DEPLOY_USER [variable]
-# DEPLOY_DIR [variable]
 name: Deploy Ardent API to Production
+
+# This deployment script assumes the following are configured in GitHub actions:
+#
+#  SSH_PRIVATE_KEY [secret]
+#  DEPLOY_HOST [variable]
+#  DEPLOY_USER [variable]
+#  DEPLOY_DIR [variable]
+#
+# It also assumes the service has been previously run using pm2:
+#
+#  pm2 start npm --name "{repository name}" -- run start
+#  pm2 save
 
 on:
   push:
