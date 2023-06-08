@@ -22,7 +22,8 @@ the behaviour and options supported.
 Get statistics for the current databases (updated hourly).
 
 * https://api.ardent-industry.com/v1/stats
-`
+
+```
     Star systems: 102,281,852
     Trade systems: 14,044
     Trade stations: 31,110
@@ -32,7 +33,8 @@ Get statistics for the current databases (updated hourly).
     Trade updates in last 7 days: 367,632
     Trade updates in last 30 days: 5,942,089
     Unique commodities: 385
-`
+```
+
 ### Get trade reports
 
 Trade reports have analysis and details about bulk commodities being traded in
