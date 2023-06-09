@@ -3,13 +3,14 @@
 ## About this software
 
 The Ardent API provides access to data submitted to the Elite Dangerous Data 
-Network (EDDN) and saved by the Ardent Collector service.
+Network and is stored by the 
+[Ardent Collector](https://github.com/iaincollins/ardent-collector/).
 
-The Ardent Data store contains details for over 100,000,000 star systems and
-millions of buy and sell orders for trade commodities sold in stations, ports
-and on carriers throughout the galaxy.
+The API provides access to information for over 100,000,000 star systems and
+tracks millions of buy and sell orders for trade commodities sold in stations, 
+ports and on carriers throughout the galaxy.
 
-The Ardent API provides read-only access to the data and automatically trade
+The Ardent API provides access to the data and automatically generated trade
 reports via a REST API via a global Content Distribution Network.
 
 ## REST API
@@ -212,3 +213,13 @@ e.g. https://api.ardent-industry.com/v1/system/name/Sol/commodity/name/gold/near
 * maxPrice (int); default null
 * fleetCarriers (bool); default null
 * maxDistance (int); default 100, max 500
+
+## Legal
+
+Copyright Iain Collins, 2023.
+
+This software has been released under the GNU Affero General Public License.
+
+Elite Dangerous, which is copyright Frontier Developments plc. This software is 
+not endorsed by nor reflects the views or opinions of Frontier Developments and 
+no employee of Frontier Developments was involved in the making of it.
