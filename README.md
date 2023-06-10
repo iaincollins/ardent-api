@@ -1,5 +1,10 @@
 # Ardent API
 
+The Ardent API is in beta as of 8 June 2023.
+
+This software uses semantic versioning to refect bug fixes, enhancements and 
+breaking changes, routes under /v1/ may have breaking changes during the beta.
+
 ## About this software
 
 The Ardent API provides access to data submitted to the Elite Dangerous Data 
@@ -17,6 +22,12 @@ reports via a REST API via a global Content Distribution Network.
 
 The folllowing is a summary of supported API endpoints and a description of 
 the behaviour and options supported.
+
+### Get version
+
+Get Ardent API software version.
+
+* https://api.ardent-industry.com/v1/version
 
 ### Get statistics
 
@@ -72,7 +83,7 @@ avoid skewing reports with unreliable data.
       "totalDemand": 1899662825
     } ... ]
 
-### Get commodity information
+### Commodity information
 
 #### Information for a specific commodity
 
@@ -124,11 +135,11 @@ e.g. https://api.ardent-industry.com/v1/system/name/Sol
 
 #### Get a list of nearby systems
 
-Returns a list of up to 1000 of the nearest systems for any given known system.
+Returns a list of up to 1000 nearby systems, ordered by distance.
 
-* https://api.ardent-industry.com/v1/system/name/{systemName}/nearest
+* https://api.ardent-industry.com/v1/system/name/{systemName}/nearby
 
-e.g. https://api.ardent-industry.com/v1/system/name/Sol/nearest
+e.g. https://api.ardent-industry.com/v1/system/name/Sol/nearby
 
 ##### Supported query parameters
 
@@ -180,15 +191,15 @@ Get all buy/sell orders for a specific commodity in a system.
 
 e.g. https://api.ardent-industry.com/v1/system/name/Sol/commodity/name/gold
 
-#### Get a list of the nearest importers of a commodity
+#### Get a list of nearby importers of a commodity
 
 Get a list of nearby places that importing a commodity close to the specified 
 system. Returns the first 1000 results, ordered by the highest price they are 
 willing to pay.
 
-* https://api.ardent-industry.com/v1/system/name/{systemName}/commodity/name/{commodityName}/nearest/imports
+* https://api.ardent-industry.com/v1/system/name/{systemName}/commodity/name/{commodityName}/nearby/imports
 
-e.g. https://api.ardent-industry.com/v1/system/name/Sol/commodity/name/gold/nearest/imports
+e.g. https://api.ardent-industry.com/v1/system/name/Sol/commodity/name/gold/nearby/imports
 
 ##### Supported query parameters
 
@@ -197,15 +208,15 @@ e.g. https://api.ardent-industry.com/v1/system/name/Sol/commodity/name/gold/near
 * fleetCarriers (bool); default null
 * maxDistance (int); default 100, max 500
 
-#### Get a list of the nearest exporters of a commodity
+#### Get a list of nearby exporters of a commodity
 
 Get a list of nearby places that importing a commodity close to the specified 
 system. Returns the first 1000 results, ordered by the lowest price you can buy
 it for.
 
-* https://api.ardent-industry.com/v1/system/name/{systemName}/commodity/name/{commodityName}/nearest/exports
+* https://api.ardent-industry.com/v1/system/name/{systemName}/commodity/name/{commodityName}/nearby/exports
 
-e.g. https://api.ardent-industry.com/v1/system/name/Sol/commodity/name/gold/nearest/exports
+e.g. https://api.ardent-industry.com/v1/system/name/Sol/commodity/name/gold/nearby/exports
 
 ##### Supported query parameters
 

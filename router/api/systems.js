@@ -2,10 +2,10 @@ const { tradeDbAsync, systemsDbAsync } = require('../../lib/db/db-async')
 const { getNearbySystemSectors } = require('../../lib/system-sectors')
 const { paramAsBoolean, paramAsInt } = require('../../lib/utils/parse-query-params')
 
-const DEFAULT_NEAREST_SYSTEMS_DISTANCE = 100
-const MAX_NEAREST_SYSTEMS_DISTANCE = 500 // Distance in Ly
-const MAX_NEAREST_SYSTEMS_RESULTS = 1000
-const MAX_NEAREST_COMMODITY_RESULTS = 1000
+const DEFAULT_NEARBY_SYSTEMS_DISTANCE = 100
+const MAX_NEARBY_SYSTEMS_DISTANCE = 500 // Distance in Ly
+const MAX_NEARBY_SYSTEMS_RESULTS = 1000
+const MAX_NEARBY_COMMODITY_RESULTS = 1000
 
 module.exports = (router) => {
   router.get('/api/v1/system/name/:systemName', async (ctx, next) => {
@@ -81,15 +81,15 @@ module.exports = (router) => {
     ctx.body = commodities || 'No imported commodities'
   })
 
-  router.get('/api/v1/system/name/:systemName/commodity/name/:commodityName/nearest/imports', async (ctx, next) => {
+  router.get('/api/v1/system/name/:systemName/commodity/name/:commodityName/nearby/imports', async (ctx, next) => {
     const { systemName, commodityName } = ctx.params
     let {
       minVolume = 1,
       minPrice = 1,
-      maxDistance = DEFAULT_NEAREST_SYSTEMS_DISTANCE,
+      maxDistance = DEFAULT_NEARBY_SYSTEMS_DISTANCE,
       fleetCarriers = null
     } = ctx.query
-    if (maxDistance > MAX_NEAREST_SYSTEMS_DISTANCE) { maxDistance = MAX_NEAREST_SYSTEMS_DISTANCE }
+    if (maxDistance > MAX_NEARBY_SYSTEMS_DISTANCE) { maxDistance = MAX_NEARBY_SYSTEMS_DISTANCE }
     maxDistance = parseInt(maxDistance)
 
     const { systemAddress, systemX, systemY, systemZ } = await getSystemByName(systemName)
@@ -115,7 +115,7 @@ module.exports = (router) => {
         AND SQRT(POWER(systemX-@systemX,2)+POWER(systemY-@systemY,2)+POWER(systemZ-@systemZ,2)) < @maxDistance
         ${filters.join(' ')}
       ORDER BY sellPrice DESC
-        LIMIT ${MAX_NEAREST_COMMODITY_RESULTS}`, {
+        LIMIT ${MAX_NEARBY_COMMODITY_RESULTS}`, {
       commodityName,
       systemX,
       systemY,
@@ -126,15 +126,15 @@ module.exports = (router) => {
     ctx.body = commodities || 'Commodity not found'
   })
 
-  router.get('/api/v1/system/name/:systemName/commodity/name/:commodityName/nearest/exports', async (ctx, next) => {
+  router.get('/api/v1/system/name/:systemName/commodity/name/:commodityName/nearby/exports', async (ctx, next) => {
     const { systemName, commodityName } = ctx.params
     let {
       minVolume = 1,
       maxPrice = null,
-      maxDistance = DEFAULT_NEAREST_SYSTEMS_DISTANCE,
+      maxDistance = DEFAULT_NEARBY_SYSTEMS_DISTANCE,
       fleetCarriers = null
     } = ctx.query
-    if (maxDistance > MAX_NEAREST_SYSTEMS_DISTANCE) { maxDistance = MAX_NEAREST_SYSTEMS_DISTANCE }
+    if (maxDistance > MAX_NEARBY_SYSTEMS_DISTANCE) { maxDistance = MAX_NEARBY_SYSTEMS_DISTANCE }
     maxDistance = parseInt(maxDistance)
 
     const { systemAddress, systemX, systemY, systemZ } = await getSystemByName(systemName)
@@ -162,7 +162,7 @@ module.exports = (router) => {
         AND SQRT(POWER(systemX-@systemX,2)+POWER(systemY-@systemY,2)+POWER(systemZ-@systemZ,2)) < @maxDistance
         ${filters.join(' ')}
       ORDER BY buyPrice ASC
-        LIMIT ${MAX_NEAREST_COMMODITY_RESULTS}`, {
+        LIMIT ${MAX_NEARBY_COMMODITY_RESULTS}`, {
       commodityName,
       systemX,
       systemY,
@@ -173,13 +173,13 @@ module.exports = (router) => {
     ctx.body = commodities || 'Commodity not found'
   })
 
-  router.get('/api/v1/system/name/:systemName/nearest', async (ctx, next) => {
+  router.get('/api/v1/system/name/:systemName/nearby', async (ctx, next) => {
     const { systemName } = ctx.params
     let {
-      maxDistance = DEFAULT_NEAREST_SYSTEMS_DISTANCE
+      maxDistance = DEFAULT_NEARBY_SYSTEMS_DISTANCE
     } = ctx.query
 
-    if (maxDistance > MAX_NEAREST_SYSTEMS_DISTANCE) { maxDistance = MAX_NEAREST_SYSTEMS_DISTANCE }
+    if (maxDistance > MAX_NEARBY_SYSTEMS_DISTANCE) { maxDistance = MAX_NEARBY_SYSTEMS_DISTANCE }
     maxDistance = parseInt(maxDistance)
 
     const { systemAddress, systemX, systemY, systemZ } = await getSystemByName(systemName)
@@ -199,7 +199,7 @@ module.exports = (router) => {
       WHERE systemSector IN ('${nearbySectors.join("', '")}')
         AND SQRT(POWER(systemX-@systemX,2)+POWER(systemY-@systemY,2)+POWER(systemZ-@systemZ,2)) < @maxDistance
       ORDER BY distance
-      LIMIT ${MAX_NEAREST_SYSTEMS_RESULTS + 1}
+        LIMIT ${MAX_NEARBY_SYSTEMS_RESULTS + 1}
       `, {
       systemX,
       systemY,
