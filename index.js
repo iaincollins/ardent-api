@@ -29,6 +29,7 @@ const router = require('./router')
   app.use((ctx, next) => {
     ctx.set('Cache-Control', ARDENT_API_DEFAULT_CACHE_CONTROL)
     ctx.set('Ardent-API-Version', `${Package.version}`)
+    ctx.set('Access-Control-Allow-Origin', '*')
     return next()
   })
 
