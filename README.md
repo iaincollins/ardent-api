@@ -1,9 +1,10 @@
 # Ardent API
 
-The Ardent API is in beta as of 8 June 2023.
+The Ardent API powers https://ardent-industy.com
 
-This software uses semantic versioning to refect bug fixes, enhancements and 
-breaking changes, routes under /v1/ may have breaking changes during the beta.
+The Ardent API and website are in beta as of June 2023.
+
+The API may be subject to breaking changes during the beta.
 
 ## About this software
 
