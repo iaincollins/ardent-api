@@ -1,6 +1,7 @@
 const { tradeDbAsync, systemsDbAsync } = require('../../lib/db/db-async')
 const { getNearbySystemSectors } = require('../../lib/system-sectors')
 const { paramAsBoolean, paramAsInt } = require('../../lib/utils/parse-query-params')
+const NotFoundResponse = require('../../lib/response/not-found')
 
 const DEFAULT_NEARBY_SYSTEMS_DISTANCE = 100
 const MAX_NEARBY_SYSTEMS_DISTANCE = 500 // Distance in Ly
@@ -11,24 +12,30 @@ module.exports = (router) => {
   router.get('/api/v1/system/name/:systemName', async (ctx, next) => {
     const { systemName } = ctx.params
     const system = await getSystemByName(systemName)
-    if (!system) {
-      ctx.status = 404
-      ctx.body = 'System not found'
-      return
-    }
+    if (!system) return NotFoundResponse(ctx, 'System not found')
     ctx.body = system
   })
 
   router.get('/api/v1/system/name/:systemName/commodities', async (ctx, next) => {
     const { systemName } = ctx.params
+
+    // Validate system name
+    const system = await getSystemByName(systemName)
+    if (!system) return NotFoundResponse(ctx, 'System not found')
+
     const commodities = await tradeDbAsync.all('SELECT * FROM commodities WHERE systemName = @systemName COLLATE NOCASE', { systemName })
-    ctx.body = commodities || 'No commodities found in system'
+    ctx.body = commodities
   })
 
   router.get('/api/v1/system/name/:systemName/commodity/name/:commodityName', async (ctx, next) => {
     const { systemName, commodityName } = ctx.params
+
+    // Validate system name
+    const system = await getSystemByName(systemName)
+    if (!system) return NotFoundResponse(ctx, 'System not found')
+
     const commodities = await tradeDbAsync.all('SELECT * FROM commodities WHERE systemName = @systemName COLLATE NOCASE AND commodityName = @commodityName COLLATE NOCASE', { systemName, commodityName })
-    ctx.body = commodities || 'No instances of commodity found in system'
+    ctx.body = commodities
   })
 
   router.get('/api/v1/system/name/:systemName/commodities/imports', async (ctx, next) => {
@@ -39,10 +46,15 @@ module.exports = (router) => {
       fleetCarriers = null
     } = ctx.query
 
+    // Validate system name
+    const system = await getSystemByName(systemName)
+    if (!system) return NotFoundResponse(ctx, 'System not found')
+
     const filters = [
       `AND demand >= ${parseInt(minVolume)}`,
       `AND sellPrice >= ${parseInt(minPrice)}`
     ]
+
     if (paramAsBoolean(fleetCarriers) !== null) {
       filters.push(`AND fleetCarrier = ${paramAsInt(fleetCarriers)}`)
     }
@@ -53,6 +65,7 @@ module.exports = (router) => {
         ${filters.join(' ')}
       ORDER BY commodityName ASC
     `, { systemName })
+
     ctx.body = commodities || 'No imported commodities'
   })
 
@@ -64,10 +77,16 @@ module.exports = (router) => {
       fleetCarriers = null
     } = ctx.query
 
+    // Validate system name
+    const system = await getSystemByName(systemName)
+    if (!system) return NotFoundResponse(ctx, 'System not found')
+
     const filters = [
       `AND stock >= ${parseInt(minVolume)}`
     ]
+
     if (maxPrice !== null) { filters.push(`AND buyPrice <= ${parseInt(maxPrice)}`) }
+
     if (paramAsBoolean(fleetCarriers) !== null) {
       filters.push(`AND fleetCarrier = ${paramAsInt(fleetCarriers)}`)
     }
@@ -78,7 +97,8 @@ module.exports = (router) => {
         ${filters.join(' ')}
       ORDER BY commodityName ASC
     `, { systemName })
-    ctx.body = commodities || 'No imported commodities'
+
+    ctx.body = commodities
   })
 
   router.get('/api/v1/system/name/:systemName/commodity/name/:commodityName/nearby/imports', async (ctx, next) => {
@@ -93,17 +113,13 @@ module.exports = (router) => {
     maxDistance = parseInt(maxDistance)
 
     const { systemAddress, systemX, systemY, systemZ } = await getSystemByName(systemName)
-
-    if (!systemAddress) {
-      ctx.status = 404
-      ctx.body = 'System not found'
-      return
-    }
+    if (!systemAddress) return NotFoundResponse(ctx, 'System not found')
 
     const filters = [
       `AND demand >= ${parseInt(minVolume)}`,
       `AND sellPrice >= ${parseInt(minPrice)}`
     ]
+
     if (paramAsBoolean(fleetCarriers) !== null) { filters.push(`AND fleetCarrier = ${paramAsInt(fleetCarriers)}`) }
 
     const commodities = await tradeDbAsync.all(`
@@ -125,7 +141,7 @@ module.exports = (router) => {
       maxDistance
     })
 
-    ctx.body = commodities || 'Commodity not found'
+    ctx.body = commodities
   })
 
   router.get('/api/v1/system/name/:systemName/commodity/name/:commodityName/nearby/exports', async (ctx, next) => {
@@ -140,12 +156,7 @@ module.exports = (router) => {
     maxDistance = parseInt(maxDistance)
 
     const { systemAddress, systemX, systemY, systemZ } = await getSystemByName(systemName)
-
-    if (!systemAddress) {
-      ctx.status = 404
-      ctx.body = 'System not found'
-      return
-    }
+    if (!systemAddress) return NotFoundResponse(ctx, 'System not found')
 
     const filters = [
       `AND stock >= ${parseInt(minVolume)}`
@@ -174,7 +185,7 @@ module.exports = (router) => {
       maxDistance
     })
 
-    ctx.body = commodities || 'Commodity not found'
+    ctx.body = commodities
   })
 
   router.get('/api/v1/system/name/:systemName/nearby', async (ctx, next) => {
@@ -187,12 +198,7 @@ module.exports = (router) => {
     maxDistance = parseInt(maxDistance)
 
     const { systemAddress, systemX, systemY, systemZ } = await getSystemByName(systemName)
-
-    if (!systemAddress) {
-      ctx.status = 404
-      ctx.body = 'System not found'
-      return
-    }
+    if (!systemAddress) return NotFoundResponse(ctx, 'System not found')
 
     const nearbySectors = getNearbySystemSectors(systemX, systemY, systemZ, maxDistance)
     const nearestSystems = await systemsDbAsync.all(`

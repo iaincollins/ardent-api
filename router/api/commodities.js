@@ -3,6 +3,7 @@ const path = require('path')
 const { paramAsBoolean, paramAsInt } = require('../../lib/utils/parse-query-params')
 const { tradeDbAsync } = require('../../lib/db/db-async')
 const { ARDENT_REPORTS_DIR } = require('../../lib/consts')
+const NotFoundResponse = require('../../lib/response/not-found')
 
 const COMMODITIES_REPORT = path.join(ARDENT_REPORTS_DIR, 'commodities.json')
 const CORE_SYSTEMS_1000_REPORT = path.join(ARDENT_REPORTS_DIR, 'core-systems-1000.json')
@@ -26,7 +27,8 @@ module.exports = (router) => {
     const { commodityName } = ctx.params
     const commodities = JSON.parse(fs.readFileSync(COMMODITIES_REPORT))
     const commodity = (commodities.commodities.filter(c => c.commodityName === commodityName.toLowerCase()))?.[0]
-    ctx.body = commodity || 'Commodity not found'
+    if (!commodity) return NotFoundResponse(ctx, 'Commodity not found')
+    ctx.body = commodity
   })
 
   router.get('/api/v1/commodity/name/:commodityName/imports', async (ctx, next) => {
@@ -51,7 +53,7 @@ module.exports = (router) => {
       commodityName
     })
 
-    ctx.body = commodities || 'Commodity not found'
+    ctx.body = commodities
   })
 
   router.get('/api/v1/commodity/name/:commodityName/exports', async (ctx, next) => {
@@ -78,6 +80,6 @@ module.exports = (router) => {
       commodityName
     })
 
-    ctx.body = commodities || 'Commodity not found'
+    ctx.body = commodities
   })
 }
