@@ -112,7 +112,8 @@ module.exports = (router) => {
         ROUND(SQRT(POWER(systemX-@systemX,2)+POWER(systemY-@systemY,2)+POWER(systemZ-@systemZ,2))) AS distance
       FROM commodities WHERE
         commodityName = @commodityName COLLATE NOCASE
-        AND SQRT(POWER(systemX-@systemX,2)+POWER(systemY-@systemY,2)+POWER(systemZ-@systemZ,2)) < @maxDistance
+        AND systemName != @systemName
+        AND distance <= @maxDistance
         ${filters.join(' ')}
       ORDER BY sellPrice DESC
         LIMIT ${MAX_NEARBY_COMMODITY_RESULTS}`, {
@@ -120,6 +121,7 @@ module.exports = (router) => {
       systemX,
       systemY,
       systemZ,
+      systemName,
       maxDistance
     })
 
@@ -159,7 +161,8 @@ module.exports = (router) => {
         ROUND(SQRT(POWER(systemX-@systemX,2)+POWER(systemY-@systemY,2)+POWER(systemZ-@systemZ,2))) AS distance
       FROM commodities WHERE
         commodityName = @commodityName COLLATE NOCASE
-        AND SQRT(POWER(systemX-@systemX,2)+POWER(systemY-@systemY,2)+POWER(systemZ-@systemZ,2)) < @maxDistance
+        AND systemName != @systemName
+        AND distance <= @maxDistance
         ${filters.join(' ')}
       ORDER BY buyPrice ASC
         LIMIT ${MAX_NEARBY_COMMODITY_RESULTS}`, {
@@ -167,6 +170,7 @@ module.exports = (router) => {
       systemX,
       systemY,
       systemZ,
+      systemName,
       maxDistance
     })
 
@@ -196,18 +200,17 @@ module.exports = (router) => {
         *,
         ROUND(SQRT(POWER(systemX-@systemX,2)+POWER(systemY-@systemY,2)+POWER(systemZ-@systemZ,2))) AS distance
       FROM systems
-      WHERE systemSector IN ('${nearbySectors.join("', '")}')
-        AND SQRT(POWER(systemX-@systemX,2)+POWER(systemY-@systemY,2)+POWER(systemZ-@systemZ,2)) < @maxDistance
+        WHERE systemSector IN ('${nearbySectors.join("', '")}')
+        AND systemName != @systemName
+        AND distance <= @maxDistance
       ORDER BY distance
-        LIMIT ${MAX_NEARBY_SYSTEMS_RESULTS + 1}
-      `, {
+        LIMIT ${MAX_NEARBY_SYSTEMS_RESULTS}`, {
       systemX,
       systemY,
       systemZ,
+      systemName,
       maxDistance
     })
-
-    nearestSystems.shift() // Remove first result as it === system
 
     ctx.body = nearestSystems
   })
