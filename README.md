@@ -1,6 +1,6 @@
 # Ardent API
 
-The Ardent API powers [ardent-industy.com](https://ardent-industy.com)
+The Ardent API powers [ardent-industry.com](https://ardent-industry.com)
 
 The Ardent API and website are in beta as of June 2023.
 
