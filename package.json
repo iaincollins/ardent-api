@@ -1,6 +1,6 @@
 {
   "name": "ardent-api",
-  "version": "2.3.1",
+  "version": "2.4.0",
   "description": "Ardent API provides access to data submitted to EDDN",
   "main": "index.js",
   "scripts": {

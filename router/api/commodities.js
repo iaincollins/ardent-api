@@ -2,12 +2,12 @@ const fs = require('fs')
 const path = require('path')
 const { paramAsBoolean, paramAsInt } = require('../../lib/utils/parse-query-params')
 const { tradeDbAsync } = require('../../lib/db/db-async')
-const { ARDENT_REPORTS_DIR } = require('../../lib/consts')
+const { ARDENT_CACHE_DIR } = require('../../lib/consts')
 const NotFoundResponse = require('../../lib/response/not-found')
 
-const COMMODITIES_REPORT = path.join(ARDENT_REPORTS_DIR, 'commodities.json')
-const CORE_SYSTEMS_1000_REPORT = path.join(ARDENT_REPORTS_DIR, 'core-systems-1000.json')
-const COLONIA_SYSTEMS_1000_REPORT = path.join(ARDENT_REPORTS_DIR, 'colonia-systems-1000.json')
+const COMMODITIES_REPORT = path.join(ARDENT_CACHE_DIR, 'commodities.json')
+const CORE_SYSTEMS_1000_REPORT = path.join(ARDENT_CACHE_DIR, 'core-systems-1000.json')
+const COLONIA_SYSTEMS_1000_REPORT = path.join(ARDENT_CACHE_DIR, 'colonia-systems-1000.json')
 const MAX_COMMODITY_SORTED_RESULTS = 100
 
 module.exports = (router) => {
@@ -24,11 +24,27 @@ module.exports = (router) => {
   })
 
   router.get('/api/v1/commodity/name/:commodityName', async (ctx, next) => {
-    const { commodityName } = ctx.params
-    const commodities = JSON.parse(fs.readFileSync(COMMODITIES_REPORT))
-    const commodity = (commodities.commodities.filter(c => c.commodityName === commodityName.toLowerCase()))?.[0]
-    if (!commodity) return NotFoundResponse(ctx, 'Commodity not found')
-    ctx.body = commodity
+    let { commodityName } = ctx.params
+    commodityName = commodityName.trim().toLowerCase().replace(/[^a-zA-Z0-9]/g, '')
+    const pathToFile = path.join(ARDENT_CACHE_DIR, 'commodities', `${commodityName}`, `${commodityName}.json`)
+    if (!fs.existsSync(pathToFile)) return NotFoundResponse(ctx, 'Commodity not found')
+    ctx.body = JSON.parse(fs.readFileSync(pathToFile))
+  })
+
+  router.get('/api/v1/commodity/name/:commodityName/core-systems-1000', async (ctx, next) => {
+    let { commodityName } = ctx.params
+    commodityName = commodityName.trim().toLowerCase().replace(/[^a-zA-Z0-9]/g, '')
+    const pathToFile = path.join(ARDENT_CACHE_DIR, 'commodities', `${commodityName}`, 'core-systems-1000.json')
+    if (!fs.existsSync(pathToFile)) return NotFoundResponse(ctx, 'Commodity not found')
+    ctx.body = JSON.parse(fs.readFileSync(pathToFile))
+  })
+
+  router.get('/api/v1/commodity/name/:commodityName/colonia-systems-1000', async (ctx, next) => {
+    let { commodityName } = ctx.params
+    commodityName = commodityName.trim().toLowerCase().replace(/[^a-zA-Z0-9]/g, '')
+    const pathToFile = path.join(ARDENT_CACHE_DIR, 'commodities', `${commodityName}`, 'colonia-systems-1000.json')
+    if (!fs.existsSync(pathToFile)) return NotFoundResponse(ctx, 'Commodity not found')
+    ctx.body = JSON.parse(fs.readFileSync(pathToFile))
   })
 
   router.get('/api/v1/commodity/name/:commodityName/imports', async (ctx, next) => {

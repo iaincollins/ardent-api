@@ -4,7 +4,7 @@ console.log(`Ardent Collector v${Package.version} starting`)
 // Initalise default value for env vars before other imports
 console.log('Configuring environment …')
 const {
-  ARDENT_DATA_DIR,
+  ARDENT_CACHE_DIR,
   ARDENT_API_DEFAULT_CACHE_CONTROL,
   ARDENT_API_LOCAL_PORT
 } = require('./lib/consts')
@@ -49,7 +49,7 @@ process.on('exit', () => console.log('Shutting down'))
 process.on('uncaughtException', (e) => console.log('Uncaught exception:', e))
 
 function printStats () {
-  const stats = JSON.parse(fs.readFileSync(path.join(ARDENT_DATA_DIR, 'stats.json')))
+  const stats = JSON.parse(fs.readFileSync(path.join(ARDENT_CACHE_DIR, 'database-stats.json')))
 
   return `Ardent API v${Package.version} Online\n` +
     '--------------------------\n' +

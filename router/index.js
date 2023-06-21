@@ -4,7 +4,7 @@ const KoaRouter = require('koa-router')
 const Package = require('../package.json')
 const addCommoditiesRoutes = require('./api/commodities')
 const addSystemsRoutes = require('./api/systems')
-const { ARDENT_API_HOSTNAME, ARDENT_DATA_DIR } = require('../lib/consts')
+const { ARDENT_API_HOSTNAME, ARDENT_DATA_DIR, ARDENT_CACHE_DIR } = require('../lib/consts')
 
 const router = new KoaRouter()
 
@@ -15,7 +15,7 @@ router.get('/api/v1/version', (ctx, next) => {
 })
 
 router.get('/api/v1/stats', (ctx, next) => {
-  ctx.body = JSON.parse(fs.readFileSync(path.join(ARDENT_DATA_DIR, 'stats.json')))
+  ctx.body = JSON.parse(fs.readFileSync(path.join(ARDENT_CACHE_DIR, 'database-stats.json')))
 })
 
 router.get('/api/v1/backup', (ctx, next) => {
