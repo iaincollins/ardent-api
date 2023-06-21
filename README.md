@@ -37,15 +37,14 @@ Get statistics for the current databases (updated hourly).
 * https://api.ardent-industry.com/v1/stats
 
 ```
-    Star systems: 102,281,852
-    Trade systems: 14,044
-    Trade stations: 31,110
-    Trade carriers: 4,155
-    Trade orders: 7,594,059
-    Trade updates in last 24 hours: 490
-    Trade updates in last 7 days: 367,632
-    Trade updates in last 30 days: 5,942,089
-    Unique commodities: 385
+    Star systems: 102,694,411
+    Trade systems: 16,419
+    Trade stations: 42,695
+    Trade carriers: 5,360
+    Trade orders: 10,773,236
+    Trade updates in last 24 hours: 563,215
+    Trade updates in last 7 days: 2,475,140
+    Trade updates in last 30 days: 7,234,476
 ```
 
 ### Get trade reports
@@ -53,9 +52,10 @@ Get statistics for the current databases (updated hourly).
 Trade reports have analysis and details about bulk commodities being traded in
 systems in and around the Core Systems (aka The Bubble) and near Colonia.
 
-These reports intentionally exclude market data from Fleet Carriers to avoid 
-skewing reports with unreliable data and only includes values for systems where 
-supply or demand for a given commodity is at least 1000T.
+The 'Core Systems 1000' and the 'Colonia Systems 1000' reports intentionally 
+exclude market data from Fleet Carriers to avoid skewing the summaries with 
+volitile data. The reports only include trade orders where supply or demand 
+for a given commodity is at least 1000T.
 
 * https://api.ardent-industry.com/v1/commodities/core-systems-1000
 * https://api.ardent-industry.com/v1/commodities/colonia-systems-1000
@@ -86,15 +86,15 @@ avoid skewing reports with unreliable data.
 
 ### Commodity information
 
-#### Information for a specific commodity
+#### Get information for a commodity
 
-Get summary report for a specific commodity.
+Get summary report for a commodity.
 
 * https://api.ardent-industry.com/v1/commodity/name/{commodityName}
 
 e.g. https://api.ardent-industry.com/v1/commodity/name/gold
 
-#### Get importers for a specific commodity
+#### Get importers for a commodity
 
 Get a list of places importing a commodity - places you can sell you - ordered 
 by the highest price they are willing to pay. Returns best 100 matching results.
@@ -109,7 +109,7 @@ e.g. https://api.ardent-industry.com/v1/commodity/name/gold/imports
 * minPrice (int); default 1
 * fleetCarriers (bool); default null
 
-#### Get exporters for a specific commodity
+#### Get exporters for a commodity
 
 Get a list of exports of a commodity - places where you can buy from - ordered 
 by the lowest price you can buy it for. Returns best 100 matching results.
@@ -123,6 +123,24 @@ e.g. https://api.ardent-industry.com/v1/commodity/name/gold/exports
  * minVolume (int); default 1
  * maxPrice (int); default null
  * fleetCarriers (bool); default null
+
+#### Get trade reports for a commodity
+
+Ardent Trade Reports for a commodity are updated daily and list recommended
+places to buy and sell commodities from, based on price, supply and location.
+
+The 'Core Systems 1000' and the 'Colonia Systems 1000' reports intentionally 
+exclude market data from Fleet Carriers to avoid skewing the summaries with 
+volitile data. The reports only include trade orders where supply or demand 
+for a given commodity is at least 1000T.
+
+* https://api.ardent-industry.com/v1/commodity/name/{commodityName}/core-systems-1000
+* https://api.ardent-industry.com/v1/commodity/name/{commodityName}/colonia-systems-1000
+
+e.g. 
+
+* https://api.ardent-industry.com/v1/commodity/name/gold/core-systems-1000
+* https://api.ardent-industry.com/v1/commodity/name/gold/colonia-systems-1000
 
 ### System information
 
@@ -184,9 +202,9 @@ e.g. https://api.ardent-industry.com/v1/system/name/Sol/commodities/exports
 * maxPrice (int); default null
 * fleetCarriers (bool); default null
 
-#### Get trade data for a specific commodity in a system
+#### Get trade data for a commodity in a system
 
-Get all buy/sell orders for a specific commodity in a system.
+Get all buy/sell orders for a commodity in a system.
 
 * https://api.ardent-industry.com/v1/system/name/{systemName}/commodity/name/{commodityName}
 
