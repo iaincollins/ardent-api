@@ -16,6 +16,41 @@ module.exports = (router) => {
     ctx.body = system
   })
 
+  router.get('/api/v1/system/name/:systemName/markets', async (ctx, next) => {
+    const { systemName } = ctx.params
+
+    // Validate system name
+    const system = await getSystemByName(systemName)
+    if (!system) return NotFoundResponse(ctx, 'System not found')
+
+    const stations = await tradeDbAsync.all('SELECT marketId, stationName, fleetCarrier, updatedAt FROM commodities WHERE systemName = @systemName COLLATE NOCASE GROUP BY marketId ORDER BY stationName', { systemName })
+    ctx.body = {
+      systemAddress: system.systemAddress,
+      systemName: system.systemName,
+      stations
+    }
+  })
+
+  router.get('/api/v1/carrier/ident/:carrierIdent/commodities', async (ctx, next) => {
+    const { carrierIdent } = ctx.params
+
+    const commodities = await tradeDbAsync.all('SELECT * FROM commodities WHERE fleetCarrier = 1 AND stationName = @carrierIdent COLLATE NOCASE ORDER BY commodityName ASC', { carrierIdent })
+    if (commodities.length === 0) return NotFoundResponse(ctx, 'Carrier market not found')
+    ctx.body = commodities
+  })
+
+  router.get('/api/v1/system/name/:systemName/market/name/:stationName/commodities', async (ctx, next) => {
+    const { systemName, stationName } = ctx.params
+
+    // Validate system name
+    const system = await getSystemByName(systemName)
+    if (!system) return NotFoundResponse(ctx, 'System not found')
+
+    const commodities = await tradeDbAsync.all('SELECT * FROM commodities WHERE systemName = @systemName AND stationName = @stationName COLLATE NOCASE ORDER BY commodityName ASC', { systemName, stationName })
+    if (commodities.length === 0) return NotFoundResponse(ctx, 'Market not found')
+    ctx.body = commodities
+  })
+
   router.get('/api/v1/system/name/:systemName/commodities', async (ctx, next) => {
     const { systemName } = ctx.params
 
@@ -23,7 +58,7 @@ module.exports = (router) => {
     const system = await getSystemByName(systemName)
     if (!system) return NotFoundResponse(ctx, 'System not found')
 
-    const commodities = await tradeDbAsync.all('SELECT * FROM commodities WHERE systemName = @systemName COLLATE NOCASE', { systemName })
+    const commodities = await tradeDbAsync.all('SELECT * FROM commodities WHERE systemName = @systemName COLLATE NOCASE ORDER BY commodityName ASC', { systemName })
     ctx.body = commodities
   })
 
@@ -92,7 +127,7 @@ module.exports = (router) => {
     }
 
     const commodities = await tradeDbAsync.all(`
-      SELECT *FROM commodities WHERE
+      SELECT * FROM commodities WHERE
         systemName = @systemName COLLATE NOCASE
         ${filters.join(' ')}
       ORDER BY commodityName ASC
