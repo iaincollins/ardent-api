@@ -50,7 +50,7 @@ module.exports = (router) => {
   router.get('/api/v1/commodity/name/:commodityName/imports', async (ctx, next) => {
     const { commodityName } = ctx.params
     const {
-      minVolume = 1,
+      minVolume = 0, // 0 === infinite demand (but *usually* indicates saturation / low prices)
       minPrice = 1,
       fleetCarriers = null
     } = ctx.query

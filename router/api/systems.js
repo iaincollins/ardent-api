@@ -24,11 +24,7 @@ module.exports = (router) => {
     if (!system) return NotFoundResponse(ctx, 'System not found')
 
     const stations = await tradeDbAsync.all('SELECT marketId, stationName, fleetCarrier, updatedAt FROM commodities WHERE systemName = @systemName COLLATE NOCASE GROUP BY marketId ORDER BY stationName', { systemName })
-    ctx.body = {
-      systemAddress: system.systemAddress,
-      systemName: system.systemName,
-      stations
-    }
+    ctx.body = stations
   })
 
   router.get('/api/v1/carrier/ident/:carrierIdent/commodities', async (ctx, next) => {
@@ -76,7 +72,7 @@ module.exports = (router) => {
   router.get('/api/v1/system/name/:systemName/commodities/imports', async (ctx, next) => {
     const { systemName } = ctx.params
     const {
-      minVolume = 1,
+      minVolume = 0, // 0 === infinite demand (but *usually* indicates saturation / low prices)
       minPrice = 1,
       fleetCarriers = null
     } = ctx.query
@@ -139,7 +135,7 @@ module.exports = (router) => {
   router.get('/api/v1/system/name/:systemName/commodity/name/:commodityName/nearby/imports', async (ctx, next) => {
     const { systemName, commodityName } = ctx.params
     let {
-      minVolume = 1,
+      minVolume = 0, // 0 === infinite demand (but *usually* indicates saturation / low prices)
       minPrice = 1,
       maxDistance = DEFAULT_NEARBY_SYSTEMS_DISTANCE,
       fleetCarriers = null
