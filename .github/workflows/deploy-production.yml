@@ -7,10 +7,14 @@ name: Deploy Ardent API to Production
 #  DEPLOY_USER [variable]
 #  DEPLOY_DIR [variable]
 #
-# It also assumes the service has been previously run using pm2:
+# It also assumes that Node.js is installed, that PM2 is installed globally
+# (e.g. `npm i pm2 -g`) and that the service has been started with `pm2`:
 #
-#  pm2 start npm --name "{repository name}" -- run start
-#  pm2 save
+#  cd {DEPLOY_DIR}/{SERVICE_NAME}
+#  pm2 start npm --name "{SERVICE_NAME}" -- run start
+#
+# DEPLOY_DIR should be an absolute path.
+# SERVICE_NAME should match the name of the repository in GitHub.
 
 on:
   push:
@@ -36,6 +40,6 @@ jobs:
         EXCLUDE: ".git*, *.md, LICENSE, node_modules/"
         SCRIPT_AFTER: |
           cd "${{ vars.DEPLOY_DIR }}/${{ env.SERVICE_NAME }}"
-          npm install
+          npm install --omit=dev 
           pm2 restart "${{ env.SERVICE_NAME }}" --cron-restart="55 7 * * *"
           echo $RSYNC_STDOUT
