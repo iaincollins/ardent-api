@@ -72,7 +72,7 @@ module.exports = (router) => {
   router.get('/api/v1/system/name/:systemName/commodities/imports', async (ctx, next) => {
     const { systemName } = ctx.params
     const {
-      minVolume = 0, // 0 === infinite demand (but *usually* indicates saturation / low prices)
+      minVolume = 1,
       minPrice = 1,
       fleetCarriers = null
     } = ctx.query
@@ -135,7 +135,7 @@ module.exports = (router) => {
   router.get('/api/v1/system/name/:systemName/commodity/name/:commodityName/nearby/imports', async (ctx, next) => {
     const { systemName, commodityName } = ctx.params
     let {
-      minVolume = 0, // 0 === infinite demand (but *usually* indicates saturation / low prices)
+      minVolume = 1,
       minPrice = 1,
       maxDistance = DEFAULT_NEARBY_SYSTEMS_DISTANCE,
       fleetCarriers = null
