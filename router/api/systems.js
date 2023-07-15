@@ -1,4 +1,4 @@
-const { tradeDbAsync, systemsDbAsync } = require('../../lib/db/db-async')
+const { systemsDbAsync, stationsDbAsync, tradeDbAsync } = require('../../lib/db/db-async')
 const { getNearbySystemSectors } = require('../../lib/system-sectors')
 const { paramAsBoolean, paramAsInt } = require('../../lib/utils/parse-query-params')
 const NotFoundResponse = require('../../lib/response/not-found')
@@ -25,6 +25,101 @@ module.exports = (router) => {
 
     const stations = await tradeDbAsync.all('SELECT marketId, stationName, fleetCarrier, updatedAt FROM commodities WHERE systemName = @systemName COLLATE NOCASE GROUP BY marketId ORDER BY stationName', { systemName })
     ctx.body = stations
+  })
+
+  router.get('/api/v1/system/name/:systemName/stations', async (ctx, next) => {
+    const { systemName } = ctx.params
+
+    // Validate system name
+    const system = await getSystemByName(systemName)
+    if (!system) return NotFoundResponse(ctx, 'System not found')
+
+    const stations = await stationsDbAsync.all('SELECT * FROM stations WHERE systemName = @systemName COLLATE NOCASE ORDER BY stationName', { systemName })
+    ctx.body = stations
+  })
+
+  router.get('/api/v1/system/name/:systemName/stations/ports', async (ctx, next) => {
+    const { systemName } = ctx.params
+
+    // Validate system name
+    const system = await getSystemByName(systemName)
+    if (!system) return NotFoundResponse(ctx, 'System not found')
+
+    const stations = await stationsDbAsync.all(
+      `SELECT * FROM stations WHERE systemName = @systemName COLLATE NOCASE`
+      +` AND (stationType = 'Planetary Port' OR stationType = 'Orbis Starport' OR stationType = 'Coriolis Starport' OR stationType = 'Ocellus Starport' OR stationType = 'Asteroid base')`
+      +` ORDER BY stationName`,
+      { systemName })
+    ctx.body = stations
+  })
+
+  router.get('/api/v1/system/name/:systemName/stations/outposts', async (ctx, next) => {
+    const { systemName } = ctx.params
+
+    // Validate system name
+    const system = await getSystemByName(systemName)
+    if (!system) return NotFoundResponse(ctx, 'System not found')
+
+    const stations = await stationsDbAsync.all(
+      `SELECT * FROM stations WHERE systemName = @systemName COLLATE NOCASE`
+      +` AND (stationType = 'Outpost' OR stationType = 'Planetary Outpost')`
+      +` ORDER BY stationName`,
+      { systemName })
+    ctx.body = stations
+  })
+
+  
+  router.get('/api/v1/system/name/:systemName/stations/settlements', async (ctx, next) => {
+    const { systemName } = ctx.params
+
+    // Validate system name
+    const system = await getSystemByName(systemName)
+    if (!system) return NotFoundResponse(ctx, 'System not found')
+
+    const stations = await stationsDbAsync.all(
+      `SELECT * FROM stations WHERE systemName = @systemName COLLATE NOCASE`
+      +` AND stationType = 'Odyssey Settlement'`
+      +` ORDER BY stationName`,
+      { systemName })
+    ctx.body = stations
+  })
+
+  router.get('/api/v1/system/name/:systemName/stations/megaships', async (ctx, next) => {
+    const { systemName } = ctx.params
+
+    // Validate system name
+    const system = await getSystemByName(systemName)
+    if (!system) return NotFoundResponse(ctx, 'System not found')
+
+    const stations = await stationsDbAsync.all(
+      `SELECT * FROM stations WHERE systemName = @systemName COLLATE NOCASE`
+     +` AND stationType = 'Mega ship'`
+     +` ORDER BY stationName`,
+     { systemName })
+    ctx.body = stations
+  })
+
+  router.get('/api/v1/system/name/:systemName/stations/carriers', async (ctx, next) => {
+    const { systemName } = ctx.params
+
+    // Validate system name
+    const system = await getSystemByName(systemName)
+    if (!system) return NotFoundResponse(ctx, 'System not found')
+
+    const stations = await stationsDbAsync.all(
+      `SELECT * FROM stations WHERE systemName = @systemName COLLATE NOCASE`
+      +` AND stationType = 'Fleet Carrier'`
+      +` ORDER BY stationName`,
+     { systemName })
+    ctx.body = stations
+  })
+
+  router.get('/api/v1/carrier/ident/:carrierIdent', async (ctx, next) => {
+    const { carrierIdent } = ctx.params
+
+    const carrier = await stationsDbAsync.get(`SELECT * FROM stations WHERE stationType = 'Fleet Carrier' AND stationName = @carrierIdent`, { carrierIdent })
+    if (!carrier) return NotFoundResponse(ctx, 'Carrier not found')
+    ctx.body = carrier
   })
 
   router.get('/api/v1/carrier/ident/:carrierIdent/commodities', async (ctx, next) => {
@@ -237,7 +332,7 @@ module.exports = (router) => {
         *,
         ROUND(SQRT(POWER(systemX-@systemX,2)+POWER(systemY-@systemY,2)+POWER(systemZ-@systemZ,2))) AS distance
       FROM systems
-        WHERE systemSector IN ('${nearbySectors.join("', '")}')
+        WHERE systemSector IN ('${nearbySectors.join('', '')}')
         AND systemName != @systemName
         AND distance <= @maxDistance
       ORDER BY distance
