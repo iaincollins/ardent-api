@@ -46,9 +46,9 @@ module.exports = (router) => {
     if (!system) return NotFoundResponse(ctx, 'System not found')
 
     const stations = await stationsDbAsync.all(
-      `SELECT * FROM stations WHERE systemName = @systemName COLLATE NOCASE`
-      +` AND (stationType = 'Planetary Port' OR stationType = 'Orbis Starport' OR stationType = 'Coriolis Starport' OR stationType = 'Ocellus Starport' OR stationType = 'Asteroid base')`
-      +` ORDER BY stationName`,
+      'SELECT * FROM stations WHERE systemName = @systemName COLLATE NOCASE' +
+      ' AND (stationType = \'Planetary Port\' OR stationType = \'Orbis Starport\' OR stationType = \'Coriolis Starport\' OR stationType = \'Ocellus Starport\' OR stationType = \'Asteroid base\')' +
+      ' ORDER BY stationName',
       { systemName })
     ctx.body = stations
   })
@@ -61,14 +61,13 @@ module.exports = (router) => {
     if (!system) return NotFoundResponse(ctx, 'System not found')
 
     const stations = await stationsDbAsync.all(
-      `SELECT * FROM stations WHERE systemName = @systemName COLLATE NOCASE`
-      +` AND (stationType = 'Outpost' OR stationType = 'Planetary Outpost')`
-      +` ORDER BY stationName`,
+      'SELECT * FROM stations WHERE systemName = @systemName COLLATE NOCASE' +
+      ' AND (stationType = \'Outpost\' OR stationType = \'Planetary Outpost\')' +
+      ' ORDER BY stationName',
       { systemName })
     ctx.body = stations
   })
 
-  
   router.get('/api/v1/system/name/:systemName/stations/settlements', async (ctx, next) => {
     const { systemName } = ctx.params
 
@@ -77,9 +76,9 @@ module.exports = (router) => {
     if (!system) return NotFoundResponse(ctx, 'System not found')
 
     const stations = await stationsDbAsync.all(
-      `SELECT * FROM stations WHERE systemName = @systemName COLLATE NOCASE`
-      +` AND stationType = 'Odyssey Settlement'`
-      +` ORDER BY stationName`,
+      'SELECT * FROM stations WHERE systemName = @systemName COLLATE NOCASE' +
+      ' AND stationType = \'Odyssey Settlement\'' +
+      ' ORDER BY stationName',
       { systemName })
     ctx.body = stations
   })
@@ -92,10 +91,10 @@ module.exports = (router) => {
     if (!system) return NotFoundResponse(ctx, 'System not found')
 
     const stations = await stationsDbAsync.all(
-      `SELECT * FROM stations WHERE systemName = @systemName COLLATE NOCASE`
-     +` AND stationType = 'Mega ship'`
-     +` ORDER BY stationName`,
-     { systemName })
+      'SELECT * FROM stations WHERE systemName = @systemName COLLATE NOCASE' +
+     ' AND stationType = \'Mega ship\'' +
+     ' ORDER BY stationName',
+      { systemName })
     ctx.body = stations
   })
 
@@ -107,17 +106,17 @@ module.exports = (router) => {
     if (!system) return NotFoundResponse(ctx, 'System not found')
 
     const stations = await stationsDbAsync.all(
-      `SELECT * FROM stations WHERE systemName = @systemName COLLATE NOCASE`
-      +` AND stationType = 'Fleet Carrier'`
-      +` ORDER BY stationName`,
-     { systemName })
+      'SELECT * FROM stations WHERE systemName = @systemName COLLATE NOCASE' +
+      ' AND stationType = \'Fleet Carrier\'' +
+      ' ORDER BY stationName',
+      { systemName })
     ctx.body = stations
   })
 
   router.get('/api/v1/carrier/ident/:carrierIdent', async (ctx, next) => {
     const { carrierIdent } = ctx.params
 
-    const carrier = await stationsDbAsync.get(`SELECT * FROM stations WHERE stationType = 'Fleet Carrier' AND stationName = @carrierIdent`, { carrierIdent })
+    const carrier = await stationsDbAsync.get('SELECT * FROM stations WHERE stationType = \'Fleet Carrier\' AND stationName = @carrierIdent', { carrierIdent })
     if (!carrier) return NotFoundResponse(ctx, 'Carrier not found')
     ctx.body = carrier
   })
@@ -332,7 +331,7 @@ module.exports = (router) => {
         *,
         ROUND(SQRT(POWER(systemX-@systemX,2)+POWER(systemY-@systemY,2)+POWER(systemZ-@systemZ,2))) AS distance
       FROM systems
-        WHERE systemSector IN ('${nearbySectors.join('', '')}')
+        WHERE systemSector IN ('${nearbySectors.join("', '")}')
         AND systemName != @systemName
         AND distance <= @maxDistance
       ORDER BY distance
