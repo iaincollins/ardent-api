@@ -1,4 +1,4 @@
-const { systemsDbAsync, stationsDbAsync, tradeDbAsync } = require('../../lib/db/db-async')
+const { systemsDbAsync, stationsDbAsync, tradeDbAsync, dbAsync } = require('../../lib/db/db-async')
 const { getNearbySystemSectors } = require('../../lib/system-sectors')
 const { paramAsBoolean, paramAsInt } = require('../../lib/utils/parse-query-params')
 const NotFoundResponse = require('../../lib/response/not-found')
@@ -148,7 +148,33 @@ module.exports = (router) => {
     const system = await getSystemByName(systemName)
     if (!system) return NotFoundResponse(ctx, 'System not found')
 
-    const commodities = await tradeDbAsync.all('SELECT * FROM commodities WHERE systemName = @systemName COLLATE NOCASE ORDER BY commodityName ASC', { systemName })
+    const commodities = await dbAsync.all(`
+      SELECT 
+        c.commodityId,
+        c.commodityName,
+        c.stationName,
+        s.stationType,
+        s.distanceToArrival,
+        s.maxLandingPadSize,
+        c.systemName,
+        c.systemX,
+        c.systemY,
+        c.systemZ,
+        c.fleetCarrier,
+        c.buyPrice,
+        c.demand,
+        c.demandBracket,
+        c.meanPrice,
+        c.sellPrice,
+        c.stock,
+        c.stockBracket,
+        c.statusFlags,
+        c.updatedAt
+      FROM trade.commodities c
+        INNER JOIN stations.stations s ON c.marketId = s.marketId 
+      WHERE c.systemName = @systemName COLLATE NOCASE
+        ORDER BY commodityName ASC
+    `, { systemName })
     ctx.body = commodities
   })
 
@@ -176,19 +202,41 @@ module.exports = (router) => {
     if (!system) return NotFoundResponse(ctx, 'System not found')
 
     const filters = [
-      `AND demand >= ${parseInt(minVolume)}`,
-      `AND sellPrice >= ${parseInt(minPrice)}`
+      `AND c.demand >= ${parseInt(minVolume)}`,
+      `AND c.sellPrice >= ${parseInt(minPrice)}`
     ]
 
     if (paramAsBoolean(fleetCarriers) !== null) {
-      filters.push(`AND fleetCarrier = ${paramAsInt(fleetCarriers)}`)
+      filters.push(`AND c.fleetCarrier = ${paramAsInt(fleetCarriers)}`)
     }
 
-    const commodities = await tradeDbAsync.all(`
-      SELECT * FROM commodities WHERE
-        systemName = @systemName COLLATE NOCASE
+    const commodities = await dbAsync.all(`
+      SELECT 
+        c.commodityId,
+        c.commodityName,
+        c.stationName,
+        s.stationType,
+        s.distanceToArrival,
+        s.maxLandingPadSize,
+        c.systemName,
+        c.systemX,
+        c.systemY,
+        c.systemZ,
+        c.fleetCarrier,
+        c.buyPrice,
+        c.demand,
+        c.demandBracket,
+        c.meanPrice,
+        c.sellPrice,
+        c.stock,
+        c.stockBracket,
+        c.statusFlags,
+        c.updatedAt
+      FROM trade.commodities c
+        INNER JOIN stations.stations s ON c.marketId = s.marketId 
+      WHERE c.systemName = @systemName COLLATE NOCASE
         ${filters.join(' ')}
-      ORDER BY commodityName ASC
+      ORDER BY c.commodityName ASC
     `, { systemName })
 
     ctx.body = commodities || 'No imported commodities'
@@ -207,20 +255,42 @@ module.exports = (router) => {
     if (!system) return NotFoundResponse(ctx, 'System not found')
 
     const filters = [
-      `AND stock >= ${parseInt(minVolume)}`
+      `AND c.stock >= ${parseInt(minVolume)}`
     ]
 
-    if (maxPrice !== null) { filters.push(`AND buyPrice <= ${parseInt(maxPrice)}`) }
+    if (maxPrice !== null) { filters.push(`AND c.buyPrice <= ${parseInt(maxPrice)}`) }
 
     if (paramAsBoolean(fleetCarriers) !== null) {
-      filters.push(`AND fleetCarrier = ${paramAsInt(fleetCarriers)}`)
+      filters.push(`AND c.fleetCarrier = ${paramAsInt(fleetCarriers)}`)
     }
 
-    const commodities = await tradeDbAsync.all(`
-      SELECT * FROM commodities WHERE
-        systemName = @systemName COLLATE NOCASE
+    const commodities = await dbAsync.all(`
+      SELECT 
+        c.commodityId,
+        c.commodityName,
+        c.stationName,
+        s.stationType,
+        s.distanceToArrival,
+        s.maxLandingPadSize,
+        c.systemName,
+        c.systemX,
+        c.systemY,
+        c.systemZ,
+        c.fleetCarrier,
+        c.buyPrice,
+        c.demand,
+        c.demandBracket,
+        c.meanPrice,
+        c.sellPrice,
+        c.stock,
+        c.stockBracket,
+        c.statusFlags,
+        c.updatedAt
+      FROM trade.commodities c
+        INNER JOIN stations.stations s ON c.marketId = s.marketId 
+      WHERE c.systemName = @systemName COLLATE NOCASE
         ${filters.join(' ')}
-      ORDER BY commodityName ASC
+      ORDER BY c.commodityName ASC
     `, { systemName })
 
     ctx.body = commodities
