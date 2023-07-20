@@ -150,7 +150,7 @@ module.exports = (router) => {
 
     const commodities = await dbAsync.all(`
       SELECT 
-        c.commodityId,
+        DISTINCT(c.commodityId),
         c.commodityName,
         c.stationName,
         s.stationType,
@@ -212,7 +212,7 @@ module.exports = (router) => {
 
     const commodities = await dbAsync.all(`
       SELECT 
-        c.commodityId,
+        DISTINCT(c.commodityId),
         c.commodityName,
         c.stationName,
         s.stationType,
@@ -266,7 +266,7 @@ module.exports = (router) => {
 
     const commodities = await dbAsync.all(`
       SELECT 
-        c.commodityId,
+        DISTINCT(c.commodityId),
         c.commodityName,
         c.stationName,
         s.stationType,
