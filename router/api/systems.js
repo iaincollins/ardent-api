@@ -171,7 +171,7 @@ module.exports = (router) => {
         c.statusFlags,
         c.updatedAt
       FROM trade.commodities c
-        INNER JOIN stations.stations s ON c.marketId = s.marketId 
+        LEFT JOIN stations.stations s ON c.marketId = s.marketId 
       WHERE c.systemName = @systemName COLLATE NOCASE
         ORDER BY commodityName ASC
     `, { systemName })
@@ -233,7 +233,7 @@ module.exports = (router) => {
         c.statusFlags,
         c.updatedAt
       FROM trade.commodities c
-        INNER JOIN stations.stations s ON c.marketId = s.marketId 
+        LEFT JOIN stations.stations s ON c.marketId = s.marketId 
       WHERE c.systemName = @systemName COLLATE NOCASE
         ${filters.join(' ')}
       ORDER BY c.commodityName ASC
@@ -287,7 +287,7 @@ module.exports = (router) => {
         c.statusFlags,
         c.updatedAt
       FROM trade.commodities c
-        INNER JOIN stations.stations s ON c.marketId = s.marketId 
+        LEFT JOIN stations.stations s ON c.marketId = s.marketId 
       WHERE c.systemName = @systemName COLLATE NOCASE
         ${filters.join(' ')}
       ORDER BY c.commodityName ASC
