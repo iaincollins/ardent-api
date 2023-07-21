@@ -265,7 +265,7 @@ module.exports = (router) => {
     }
 
     const commodities = await dbAsync.all(`
-      SELECT 
+      SELECT
         c.commodityId,
         c.commodityName,
         c.stationName,
@@ -311,29 +311,49 @@ module.exports = (router) => {
     if (!systemAddress) return NotFoundResponse(ctx, 'System not found')
 
     const filters = [
-      `AND demand >= ${parseInt(minVolume)}`,
-      `AND sellPrice >= ${parseInt(minPrice)}`
+      `AND c.demand >= ${parseInt(minVolume)}`,
+      `AND c.sellPrice >= ${parseInt(minPrice)}`
     ]
 
-    if (paramAsBoolean(fleetCarriers) !== null) { filters.push(`AND fleetCarrier = ${paramAsInt(fleetCarriers)}`) }
+    if (paramAsBoolean(fleetCarriers) !== null) { filters.push(`AND c.fleetCarrier = ${paramAsInt(fleetCarriers)}`) }
 
-    const commodities = await tradeDbAsync.all(`
-      SELECT
-        *,
-        ROUND(SQRT(POWER(systemX-@systemX,2)+POWER(systemY-@systemY,2)+POWER(systemZ-@systemZ,2))) AS distance
-      FROM commodities WHERE
-        commodityName = @commodityName COLLATE NOCASE
-        AND systemName != @systemName
-        AND distance <= @maxDistance
-        ${filters.join(' ')}
-      ORDER BY sellPrice DESC
-        LIMIT ${MAX_NEARBY_COMMODITY_RESULTS}`, {
-      commodityName,
-      systemX,
-      systemY,
-      systemZ,
-      systemName,
-      maxDistance
+      const commodities = await dbAsync.all(`
+        SELECT
+          c.commodityId,
+          c.commodityName,
+          c.stationName,
+          s.stationType,
+          s.distanceToArrival,
+          s.maxLandingPadSize,
+          c.systemName,
+          c.systemX,
+          c.systemY,
+          c.systemZ,
+          c.fleetCarrier,
+          c.buyPrice,
+          c.demand,
+          c.demandBracket,
+          c.meanPrice,
+          c.sellPrice,
+          c.stock,
+          c.stockBracket,
+          c.statusFlags,
+          c.updatedAt,
+          ROUND(SQRT(POWER(c.systemX-@systemX,2)+POWER(c.systemY-@systemY,2)+POWER(c.systemZ-@systemZ,2))) AS distance
+        FROM trade.commodities c 
+          LEFT JOIN stations.stations s ON c.marketId = s.marketId 
+        WHERE c.commodityName = @commodityName COLLATE NOCASE
+          AND c.systemName != @systemName
+          AND distance <= @maxDistance
+          ${filters.join(' ')}
+        ORDER BY c.sellPrice DESC
+          LIMIT ${MAX_NEARBY_COMMODITY_RESULTS}`, {
+        commodityName,
+        systemX,
+        systemY,
+        systemZ,
+        systemName,
+        maxDistance
     })
 
     ctx.body = commodities
@@ -354,23 +374,43 @@ module.exports = (router) => {
     if (!systemAddress) return NotFoundResponse(ctx, 'System not found')
 
     const filters = [
-      `AND stock >= ${parseInt(minVolume)}`
+      `AND c.stock >= ${parseInt(minVolume)}`
     ]
 
-    if (maxPrice !== null) { filters.push(`AND buyPrice <= ${parseInt(maxPrice)}`) }
+    if (maxPrice !== null) { filters.push(`AND c.buyPrice <= ${parseInt(maxPrice)}`) }
 
-    if (paramAsBoolean(fleetCarriers) !== null) { filters.push(`AND fleetCarrier = ${paramAsInt(fleetCarriers)}`) }
+    if (paramAsBoolean(fleetCarriers) !== null) { filters.push(`AND c.fleetCarrier = ${paramAsInt(fleetCarriers)}`) }
 
-    const commodities = await tradeDbAsync.all(`
+    const commodities = await dbAsync.all(`
       SELECT
-        *,
-        ROUND(SQRT(POWER(systemX-@systemX,2)+POWER(systemY-@systemY,2)+POWER(systemZ-@systemZ,2))) AS distance
-      FROM commodities WHERE
-        commodityName = @commodityName COLLATE NOCASE
-        AND systemName != @systemName
+        c.commodityId,
+        c.commodityName,
+        c.stationName,
+        s.stationType,
+        s.distanceToArrival,
+        s.maxLandingPadSize,
+        c.systemName,
+        c.systemX,
+        c.systemY,
+        c.systemZ,
+        c.fleetCarrier,
+        c.buyPrice,
+        c.demand,
+        c.demandBracket,
+        c.meanPrice,
+        c.sellPrice,
+        c.stock,
+        c.stockBracket,
+        c.statusFlags,
+        c.updatedAt,
+        ROUND(SQRT(POWER(c.systemX-@systemX,2)+POWER(c.systemY-@systemY,2)+POWER(c.systemZ-@systemZ,2))) AS distance
+      FROM trade.commodities c 
+        LEFT JOIN stations.stations s ON c.marketId = s.marketId 
+      WHERE c.commodityName = @commodityName COLLATE NOCASE
+        AND c.systemName != @systemName
         AND distance <= @maxDistance
         ${filters.join(' ')}
-      ORDER BY buyPrice ASC
+      ORDER BY c.buyPrice ASC
         LIMIT ${MAX_NEARBY_COMMODITY_RESULTS}`, {
       commodityName,
       systemX,
