@@ -317,7 +317,7 @@ module.exports = (router) => {
 
     if (paramAsBoolean(fleetCarriers) !== null) { filters.push(`AND c.fleetCarrier = ${paramAsInt(fleetCarriers)}`) }
 
-      const commodities = await dbAsync.all(`
+    const commodities = await dbAsync.all(`
         SELECT
           c.commodityId,
           c.commodityName,
@@ -348,12 +348,12 @@ module.exports = (router) => {
           ${filters.join(' ')}
         ORDER BY c.sellPrice DESC
           LIMIT ${MAX_NEARBY_COMMODITY_RESULTS}`, {
-        commodityName,
-        systemX,
-        systemY,
-        systemZ,
-        systemName,
-        maxDistance
+      commodityName,
+      systemX,
+      systemY,
+      systemZ,
+      systemName,
+      maxDistance
     })
 
     ctx.body = commodities

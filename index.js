@@ -55,7 +55,7 @@ function printStats () {
     return `Ardent API v${Package.version} Online\n` +
       '--------------------------\n' +
       ((stats)
-      ? 'Locations:\n' +
+        ? 'Locations:\n' +
         `* Star systems: ${stats.systems.toLocaleString()}\n` +
         `* Points of interest: ${stats.pointsOfInterest.toLocaleString()}\n` +
         'Stations:\n' +
@@ -76,7 +76,7 @@ function printStats () {
         `* Trade updates in last 30 days: ${stats.trade.updatedInLast30Days.toLocaleString()}\n` +
         `* Unique commodities: ${stats.trade.uniqueCommodities.toLocaleString()}\n` +
         `Stats last updated: ${stats.timestamp} (updated every 15 minutes)`
-      : 'Stats not generated yet')
+        : 'Stats not generated yet')
   } catch (e) {
     return 'Error: Could not load stats'
   }
