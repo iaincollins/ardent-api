@@ -1,4 +1,4 @@
-const { systemsDbAsync, stationsDbAsync, tradeDbAsync, dbAsync } = require('../../lib/db/db-async')
+const dbAsync = require('../../lib/db/db-async')
 const { getNearbySystemSectors } = require('../../lib/system-sectors')
 const { paramAsBoolean, paramAsInt } = require('../../lib/utils/parse-query-params')
 const NotFoundResponse = require('../../lib/response/not-found')
@@ -23,7 +23,7 @@ module.exports = (router) => {
     const system = await getSystemByName(systemName)
     if (!system) return NotFoundResponse(ctx, 'System not found')
 
-    const stations = await tradeDbAsync.all('SELECT marketId, stationName, fleetCarrier, updatedAt FROM commodities WHERE systemName = @systemName COLLATE NOCASE GROUP BY marketId ORDER BY stationName', { systemName })
+    const stations = await dbAsync.all('SELECT marketId, stationName, fleetCarrier, updatedAt FROM trade.commodities WHERE systemName = @systemName COLLATE NOCASE GROUP BY marketId ORDER BY stationName', { systemName })
     ctx.body = stations
   })
 
@@ -34,7 +34,7 @@ module.exports = (router) => {
     const system = await getSystemByName(systemName)
     if (!system) return NotFoundResponse(ctx, 'System not found')
 
-    const stations = await stationsDbAsync.all('SELECT * FROM stations WHERE systemName = @systemName COLLATE NOCASE ORDER BY stationName', { systemName })
+    const stations = await dbAsync.all('SELECT * FROM stations.stations WHERE systemName = @systemName COLLATE NOCASE ORDER BY stationName', { systemName })
     ctx.body = stations
   })
 
@@ -45,9 +45,9 @@ module.exports = (router) => {
     const system = await getSystemByName(systemName)
     if (!system) return NotFoundResponse(ctx, 'System not found')
 
-    const stations = await stationsDbAsync.all(
-      'SELECT * FROM stations WHERE systemName = @systemName COLLATE NOCASE' +
-      ' AND (stationType = \'Planetary Port\' OR stationType = \'Orbis Starport\' OR stationType = \'Coriolis Starport\' OR stationType = \'Ocellus Starport\' OR stationType = \'Asteroid base\')' +
+    const stations = await dbAsync.all(
+      'SELECT * FROM stations.stations WHERE systemName = @systemName COLLATE NOCASE' +
+      ' AND (stationType = \'Planetary Port\' OR stationType = \'Orbis Starport\' OR stationType = \'Coriolis Starport\' OR stationType = \'Ocellus Starport\' OR stationType = \'Asteroid Base\')' +
       ' ORDER BY stationName',
       { systemName })
     ctx.body = stations
@@ -60,8 +60,8 @@ module.exports = (router) => {
     const system = await getSystemByName(systemName)
     if (!system) return NotFoundResponse(ctx, 'System not found')
 
-    const stations = await stationsDbAsync.all(
-      'SELECT * FROM stations WHERE systemName = @systemName COLLATE NOCASE' +
+    const stations = await dbAsync.all(
+      'SELECT * FROM stations.stations WHERE systemName = @systemName COLLATE NOCASE' +
       ' AND (stationType = \'Outpost\' OR stationType = \'Planetary Outpost\')' +
       ' ORDER BY stationName',
       { systemName })
@@ -75,8 +75,8 @@ module.exports = (router) => {
     const system = await getSystemByName(systemName)
     if (!system) return NotFoundResponse(ctx, 'System not found')
 
-    const stations = await stationsDbAsync.all(
-      'SELECT * FROM stations WHERE systemName = @systemName COLLATE NOCASE' +
+    const stations = await dbAsync.all(
+      'SELECT * FROM stations.stations WHERE systemName = @systemName COLLATE NOCASE' +
       ' AND stationType = \'Odyssey Settlement\'' +
       ' ORDER BY stationName',
       { systemName })
@@ -90,8 +90,8 @@ module.exports = (router) => {
     const system = await getSystemByName(systemName)
     if (!system) return NotFoundResponse(ctx, 'System not found')
 
-    const stations = await stationsDbAsync.all(
-      'SELECT * FROM stations WHERE systemName = @systemName COLLATE NOCASE' +
+    const stations = await dbAsync.all(
+      'SELECT * FROM stations.stations WHERE systemName = @systemName COLLATE NOCASE' +
      ' AND stationType = \'Mega ship\'' +
      ' ORDER BY stationName',
       { systemName })
@@ -105,8 +105,8 @@ module.exports = (router) => {
     const system = await getSystemByName(systemName)
     if (!system) return NotFoundResponse(ctx, 'System not found')
 
-    const stations = await stationsDbAsync.all(
-      'SELECT * FROM stations WHERE systemName = @systemName COLLATE NOCASE' +
+    const stations = await dbAsync.all(
+      'SELECT * FROM stations.stations WHERE systemName = @systemName COLLATE NOCASE' +
       ' AND stationType = \'Fleet Carrier\'' +
       ' ORDER BY stationName',
       { systemName })
@@ -116,7 +116,7 @@ module.exports = (router) => {
   router.get('/api/v1/carrier/ident/:carrierIdent', async (ctx, next) => {
     const { carrierIdent } = ctx.params
 
-    const carrier = await stationsDbAsync.get('SELECT * FROM stations WHERE stationType = \'Fleet Carrier\' AND stationName = @carrierIdent', { carrierIdent })
+    const carrier = await dbAsync.get('SELECT * FROM stations.stations WHERE stationType = \'Fleet Carrier\' AND stationName = @carrierIdent', { carrierIdent })
     if (!carrier) return NotFoundResponse(ctx, 'Carrier not found')
     ctx.body = carrier
   })
@@ -124,7 +124,7 @@ module.exports = (router) => {
   router.get('/api/v1/carrier/ident/:carrierIdent/commodities', async (ctx, next) => {
     const { carrierIdent } = ctx.params
 
-    const commodities = await tradeDbAsync.all('SELECT * FROM commodities WHERE fleetCarrier = 1 AND stationName = @carrierIdent COLLATE NOCASE ORDER BY commodityName ASC', { carrierIdent })
+    const commodities = await dbAsync.all('SELECT * FROM trade.commodities WHERE fleetCarrier = 1 AND stationName = @carrierIdent COLLATE NOCASE ORDER BY commodityName ASC', { carrierIdent })
     if (commodities.length === 0) return NotFoundResponse(ctx, 'Carrier market not found')
     ctx.body = commodities
   })
@@ -136,7 +136,7 @@ module.exports = (router) => {
     const system = await getSystemByName(systemName)
     if (!system) return NotFoundResponse(ctx, 'System not found')
 
-    const commodities = await tradeDbAsync.all('SELECT * FROM commodities WHERE systemName = @systemName AND stationName = @stationName COLLATE NOCASE ORDER BY commodityName ASC', { systemName, stationName })
+    const commodities = await dbAsync.all('SELECT * FROM trade.commodities WHERE systemName = @systemName AND stationName = @stationName COLLATE NOCASE ORDER BY commodityName ASC', { systemName, stationName })
     if (commodities.length === 0) return NotFoundResponse(ctx, 'Market not found')
     ctx.body = commodities
   })
@@ -185,7 +185,7 @@ module.exports = (router) => {
     const system = await getSystemByName(systemName)
     if (!system) return NotFoundResponse(ctx, 'System not found')
 
-    const commodities = await tradeDbAsync.all('SELECT * FROM commodities WHERE systemName = @systemName COLLATE NOCASE AND commodityName = @commodityName COLLATE NOCASE', { systemName, commodityName })
+    const commodities = await dbAsync.all('SELECT * FROM trade.commodities WHERE systemName = @systemName COLLATE NOCASE AND commodityName = @commodityName COLLATE NOCASE', { systemName, commodityName })
     ctx.body = commodities
   })
 
@@ -436,11 +436,11 @@ module.exports = (router) => {
     if (!systemAddress) return NotFoundResponse(ctx, 'System not found')
 
     const nearbySectors = getNearbySystemSectors(systemX, systemY, systemZ, maxDistance)
-    const nearestSystems = await systemsDbAsync.all(`
+    const nearestSystems = await dbAsync.all(`
       SELECT
         *,
         ROUND(SQRT(POWER(systemX-@systemX,2)+POWER(systemY-@systemY,2)+POWER(systemZ-@systemZ,2))) AS distance
-      FROM systems
+      FROM systems.systems
         WHERE systemSector IN ('${nearbySectors.join("', '")}')
         AND systemName != @systemName
         AND distance <= @maxDistance
@@ -457,7 +457,7 @@ module.exports = (router) => {
   })
 
   async function getSystemByName (systemName) {
-    const system = await systemsDbAsync.all('SELECT * FROM systems WHERE systemName = @systemName COLLATE NOCASE', { systemName })
+    const system = await dbAsync.all('SELECT * FROM systems.systems WHERE systemName = @systemName COLLATE NOCASE', { systemName })
     // @FIXME Handle edge cases where there are multiple systems with same name
     // (This is a very small number and all are unhinhabited, so low priority)
     // if (system?.length === 1) return system

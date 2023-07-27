@@ -1,7 +1,7 @@
 const fs = require('fs')
 const path = require('path')
 const { paramAsBoolean, paramAsInt } = require('../../lib/utils/parse-query-params')
-const { tradeDbAsync } = require('../../lib/db/db-async')
+const dbAsync = require('../../lib/db/db-async')
 const { ARDENT_CACHE_DIR } = require('../../lib/consts')
 const NotFoundResponse = require('../../lib/response/not-found')
 
@@ -60,8 +60,8 @@ module.exports = (router) => {
     ]
     if (paramAsBoolean(fleetCarriers) !== null) { filters.push(`AND fleetCarrier = ${paramAsInt(fleetCarriers)}`) }
 
-    const commodities = await tradeDbAsync.all(`
-      SELECT * FROM commodities WHERE
+    const commodities = await dbAsync.all(`
+      SELECT * FROM trade.commodities WHERE
         commodityName = @commodityName COLLATE NOCASE
         ${filters.join(' ')}
       ORDER BY sellPrice DESC
@@ -87,8 +87,8 @@ module.exports = (router) => {
 
     if (paramAsBoolean(fleetCarriers) !== null) { filters.push(`AND fleetCarrier = ${paramAsInt(fleetCarriers)}`) }
 
-    const commodities = await tradeDbAsync.all(`
-      SELECT * FROM commodities WHERE
+    const commodities = await dbAsync.all(`
+      SELECT * FROM trade.commodities WHERE
         commodityName = @commodityName COLLATE NOCASE
         ${filters.join(' ')}
       ORDER BY buyPrice ASC

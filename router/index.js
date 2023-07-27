@@ -2,10 +2,12 @@ const path = require('path')
 const fs = require('fs')
 const KoaRouter = require('koa-router')
 const Package = require('../package.json')
-const addCommoditiesRoutes = require('./api/commodities')
-const addSystemsRoutes = require('./api/systems')
 const { ARDENT_API_HOSTNAME, ARDENT_DATA_DIR, ARDENT_CACHE_DIR } = require('../lib/consts')
-
+const routes = {
+  commodities: require('./api/commodities'),
+  systems: require('./api/systems')
+  // locations: require('./api/locations')
+}
 const router = new KoaRouter()
 
 router.get('/api/v1', (ctx, next) => ctx.redirect(`https://${ARDENT_API_HOSTNAME}/v1/stats`))
@@ -27,8 +29,8 @@ router.get('/api/v1/backup', (ctx, next) => {
   }
 })
 
-addCommoditiesRoutes(router)
-
-addSystemsRoutes(router)
+routes.commodities(router)
+routes.systems(router)
+// routes.locations(router)
 
 module.exports = router
