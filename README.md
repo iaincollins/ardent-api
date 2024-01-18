@@ -32,7 +32,7 @@ Get Ardent API software version.
 
 ### Get statistics
 
-Get statistics for the current databases (updated hourly).
+Get statistics for the current databases (updated every 15 minutes).
 
 * https://api.ardent-industry.com/v1/stats
 
@@ -259,7 +259,7 @@ tools.
 
 ## Legal
 
-Copyright Iain Collins, 2023.
+Copyright Iain Collins, 2024.
 
 This software has been released under the GNU Affero General Public License.
 
