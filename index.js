@@ -75,7 +75,7 @@ function printStats () {
         `* Trade updates in last 7 days: ${stats.trade.updatedInLast7Days.toLocaleString()}\n` +
         `* Trade updates in last 30 days: ${stats.trade.updatedInLast30Days.toLocaleString()}\n` +
         `* Unique commodities: ${stats.trade.uniqueCommodities.toLocaleString()}\n` +
-        `Stats last updated: ${stats.timestamp} (updated every 15 minutes)`
+        `Stats last updated: ${stats.timestamp}\nStats updated every 15 minutes.`
         : 'Stats not generated yet')
   } catch (e) {
     return 'Error: Could not load stats'
