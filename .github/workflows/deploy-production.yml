@@ -1,5 +1,7 @@
 name: Deploy Ardent API to Production
 
+# ABOUT
+#
 # This deployment script assumes the following are configured in GitHub actions:
 #
 #  SSH_PRIVATE_KEY [secret]
@@ -7,14 +9,26 @@ name: Deploy Ardent API to Production
 #  DEPLOY_USER [variable]
 #  DEPLOY_DIR [variable]
 #
-# It also assumes that Node.js is installed, that PM2 is installed globally
-# (e.g. `npm i pm2 -g`) and that the service has been started with `pm2`:
+# Note:
+# * DEPLOY_DIR should be an absolute path.
+# * SERVICE_NAME should match the name of the repository in GitHub.
 #
-#  cd {DEPLOY_DIR}/{SERVICE_NAME}
-#  pm2 start npm --name "{SERVICE_NAME}" -- run start
+# SETUP
 #
-# DEPLOY_DIR should be an absolute path.
-# SERVICE_NAME should match the name of the repository in GitHub.
+# This script assumes that Node.js is installed, that "pm2" is installed 
+# globally and that pm2 has been used to already run the program once, as the 
+# same user the deploy script will run as (which should not be root).
+#
+# How to install pm2 and configure pm2 to run at startup:
+#  npm i pm2 -g
+#  pm2 startup
+#
+# An example of how to start this program using pm2:
+#  export DEPLOY_DIR=/opt/ardent
+#  export SERVICE_NAME=ardent-api
+#  cd $DEPLOY_DIR}/SERVICE_NAME
+#  pm2 start npm --name "$SERVICE_NAME" -- run start
+#  pm2 save
 
 on:
   push:
@@ -42,4 +56,5 @@ jobs:
           cd "${{ vars.DEPLOY_DIR }}/${{ env.SERVICE_NAME }}"
           npm install --omit=dev 
           pm2 restart "${{ env.SERVICE_NAME }}" --cron-restart="55 7 * * *"
+          pm2 save
           echo $RSYNC_STDOUT

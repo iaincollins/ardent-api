@@ -2,9 +2,8 @@
 
 The Ardent API powers [ardent-industry.com](https://ardent-industry.com)
 
-The Ardent API and website are in beta as of June 2023.
-
-The API may be subject to breaking changes during the beta.
+The API is considered stable and no breaking changes are anticipated, but
+expansion of parameters that be passed and enrichment of responses is planned.
 
 ## About this software
 
