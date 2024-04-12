@@ -15,9 +15,11 @@ const path = require('path')
 const fs = require('fs')
 const Koa = require('koa')
 const koaBodyParser = require('koa-bodyparser')
+const cron = require('node-cron')
 
 console.log('Loading libraries …')
 const router = require('./router')
+const warmCache = require('./lib/warm-cache')
 
 ;(async () => {
   // Start web service
@@ -42,6 +44,9 @@ const router = require('./router')
 
   console.log(printStats())
   console.log('Ardent API ready!')
+
+  // Run task to warm up the cache every 15 minutes
+  cron.schedule('0 */15 * * * *', () => warmCache())
 })()
 
 process.on('exit', () => console.log('Shutting down'))

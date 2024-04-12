@@ -1,10 +1,11 @@
 {
   "name": "ardent-api",
-  "version": "2.16.4",
+  "version": "2.17.0",
   "description": "Ardent API provides access to data submitted to EDDN",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
+    "warm-cache": "node scripts/warm-cache.js",
     "lint": "npx standard --fix"
   },
   "repository": {
@@ -22,7 +23,8 @@
     "dotenv": "^16.0.3",
     "koa": "^2.14.2",
     "koa-bodyparser": "^4.4.0",
-    "koa-router": "^12.0.0"
+    "koa-router": "^12.0.0",
+    "node-cron": "^3.0.3"
   },
   "devDependencies": {
     "standard": "^17.1.0"
