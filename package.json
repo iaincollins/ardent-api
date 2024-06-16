@@ -1,11 +1,12 @@
 {
   "name": "ardent-api",
-  "version": "2.17.0",
+  "version": "3.0.0",
   "description": "Ardent API provides access to data submitted to EDDN",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
     "warm-cache": "node scripts/warm-cache.js",
+    "dev": "node index.js",
     "lint": "npx standard --fix"
   },
   "repository": {

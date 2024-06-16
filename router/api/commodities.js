@@ -2,8 +2,9 @@ const fs = require('fs')
 const path = require('path')
 const { paramAsBoolean, paramAsInt } = require('../../lib/utils/parse-query-params')
 const dbAsync = require('../../lib/db/db-async')
-const { ARDENT_CACHE_DIR } = require('../../lib/consts')
+const { ARDENT_CACHE_DIR, DEFAULT_MAX_RESULTS_AGE } = require('../../lib/consts')
 const NotFoundResponse = require('../../lib/response/not-found')
+const { getISOTimestamp } = require('../../lib/utils/dates')
 
 const COMMODITIES_REPORT = path.join(ARDENT_CACHE_DIR, 'commodities.json')
 const CORE_SYSTEMS_1000_REPORT = path.join(ARDENT_CACHE_DIR, 'core-systems-1000.json')
@@ -52,12 +53,15 @@ module.exports = (router) => {
     const {
       minVolume = 1,
       minPrice = 1,
-      fleetCarriers = null
+      fleetCarriers = null,
+      maxDaysAgo = DEFAULT_MAX_RESULTS_AGE
     } = ctx.query
     const filters = [
       `AND demand >= ${parseInt(minVolume)}`,
-      `AND sellPrice >= ${parseInt(minPrice)}`
+      `AND sellPrice >= ${parseInt(minPrice)}`,
+      `AND updatedAt > '${getISOTimestamp(`-${maxDaysAgo}`)}'`
     ]
+
     if (paramAsBoolean(fleetCarriers) !== null) { filters.push(`AND fleetCarrier = ${paramAsInt(fleetCarriers)}`) }
 
     const commodities = await dbAsync.all(`
@@ -77,10 +81,12 @@ module.exports = (router) => {
     const {
       minVolume = 1,
       maxPrice = null,
-      fleetCarriers = null
+      fleetCarriers = null,
+      maxDaysAgo = DEFAULT_MAX_RESULTS_AGE
     } = ctx.query
     const filters = [
-      `AND stock >= ${parseInt(minVolume)}`
+      `AND stock >= ${parseInt(minVolume)}`,
+      `AND updatedAt > '${getISOTimestamp(`-${maxDaysAgo}`)}'`
     ]
 
     if (maxPrice !== null) { filters.push(`AND buyPrice <= ${parseInt(maxPrice)}`) }

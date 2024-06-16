@@ -107,6 +107,7 @@ e.g. https://api.ardent-industry.com/v1/commodity/name/gold/imports
 * minVolume (int); default 1
 * minPrice (int); default 1
 * fleetCarriers (bool); default null
+* maxDaysAgo (int); default 90
 
 #### Get exporters for a commodity
 
@@ -122,6 +123,7 @@ e.g. https://api.ardent-industry.com/v1/commodity/name/gold/exports
  * minVolume (int); default 1
  * maxPrice (int); default null
  * fleetCarriers (bool); default null
+ * maxDaysAgo (int); default 90
 
 #### Get trade reports for a commodity
 
