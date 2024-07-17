@@ -12,7 +12,7 @@ Network and is stored by the
 [Ardent Collector](https://github.com/iaincollins/ardent-collector/).
 
 The API provides access to information for over 100,000,000 star systems and
-tracks millions of buy and sell orders for trade commodities sold in stations, 
+tracks millions of buy and sell orders for trade commodities sold in stations,
 ports and on carriers throughout the galaxy.
 
 The Ardent API provides access to the data and automatically generated trade
@@ -22,6 +22,29 @@ reports via a REST API via a global Content Distribution Network.
 
 The folllowing is a summary of supported API endpoints and a description of 
 the behaviour and options supported.
+
+Notes:
+
+* The `fleetCarriers` boolean option supported on some of the endpoints is `null` 
+by default. If set to `true` or `1` the response will only include results for 
+fleet carriers, if set to `false` or `0`  the response will exclude results for 
+fleet carriers. If not specified, or set to any other value, the response will 
+include results for all stations (including from, but not limited to, fleet 
+carriers).
+
+* The `maxDistance` option is light years (`ly`) and is used to filter results 
+from other systems based on the distance of that systems main star from the 
+main star of the system the result is relative to. You cannot specify a 
+fractional value in light seconds (`ls`) to filter results within a system; 
+although the approximate distance to the main star for each station is 
+displayed (when known) it is not taken into account.
+
+* As of API version `3.0.0` the commodity `import` and `export` endpoints
+support a `maxDaysAgo` option that defaults to `90` days. This filters out data 
+older than 90 days from results by default, which makes results more relevant
+and improves response times. You can still request to include older data by
+explicitly specifying a greater value. Records are updated when newer 
+information is submitted, but older entries never expire.
 
 ### Get version
 
