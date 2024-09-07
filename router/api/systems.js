@@ -2,6 +2,8 @@ const dbAsync = require('../../lib/db/db-async')
 const { getNearbySystemSectors } = require('../../lib/system-sectors')
 const { paramAsBoolean, paramAsInt } = require('../../lib/utils/parse-query-params')
 const NotFoundResponse = require('../../lib/response/not-found')
+const { getISOTimestamp } = require('../../lib/utils/dates')
+const { DEFAULT_MAX_RESULTS_AGE } = require('../../lib/consts')
 
 const DEFAULT_NEARBY_SYSTEMS_DISTANCE = 100
 const MAX_NEARBY_SYSTEMS_DISTANCE = 500 // Distance in Ly
@@ -247,7 +249,7 @@ module.exports = (router) => {
     const {
       minVolume = 1,
       maxPrice = null,
-      fleetCarriers = null
+      fleetCarriers = null,
     } = ctx.query
 
     // Validate system name
@@ -302,7 +304,8 @@ module.exports = (router) => {
       minVolume = 1,
       minPrice = 1,
       maxDistance = DEFAULT_NEARBY_SYSTEMS_DISTANCE,
-      fleetCarriers = null
+      fleetCarriers = null,
+      maxDaysAgo = DEFAULT_MAX_RESULTS_AGE
     } = ctx.query
     if (maxDistance > MAX_NEARBY_SYSTEMS_DISTANCE) { maxDistance = MAX_NEARBY_SYSTEMS_DISTANCE }
     maxDistance = parseInt(maxDistance)
@@ -344,6 +347,7 @@ module.exports = (router) => {
           LEFT JOIN stations.stations s ON c.marketId = s.marketId 
         WHERE c.commodityName = @commodityName COLLATE NOCASE
           AND c.systemName != @systemName
+          AND c.updatedAt > '${getISOTimestamp(`-${maxDaysAgo}`)}'
           AND distance <= @maxDistance
           ${filters.join(' ')}
         ORDER BY c.sellPrice DESC
@@ -365,7 +369,8 @@ module.exports = (router) => {
       minVolume = 1,
       maxPrice = null,
       maxDistance = DEFAULT_NEARBY_SYSTEMS_DISTANCE,
-      fleetCarriers = null
+      fleetCarriers = null,
+      maxDaysAgo = DEFAULT_MAX_RESULTS_AGE
     } = ctx.query
     if (maxDistance > MAX_NEARBY_SYSTEMS_DISTANCE) { maxDistance = MAX_NEARBY_SYSTEMS_DISTANCE }
     maxDistance = parseInt(maxDistance)
@@ -408,6 +413,7 @@ module.exports = (router) => {
         LEFT JOIN stations.stations s ON c.marketId = s.marketId 
       WHERE c.commodityName = @commodityName COLLATE NOCASE
         AND c.systemName != @systemName
+        AND c.updatedAt > '${getISOTimestamp(`-${maxDaysAgo}`)}'
         AND distance <= @maxDistance
         ${filters.join(' ')}
       ORDER BY c.buyPrice ASC

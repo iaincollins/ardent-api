@@ -250,6 +250,7 @@ e.g. https://api.ardent-industry.com/v1/system/name/Sol/commodity/name/gold/near
 * minPrice (int); default 1
 * fleetCarriers (bool); default null
 * maxDistance (int); default 100, max 500
+* maxDaysAgo (int); default 90
 
 #### Get a list of nearby exporters of a commodity
 
@@ -267,6 +268,7 @@ e.g. https://api.ardent-industry.com/v1/system/name/Sol/commodity/name/gold/near
 * maxPrice (int); default null
 * fleetCarriers (bool); default null
 * maxDistance (int); default 100, max 500
+* maxDaysAgo (int); default 90
 
 ## Credits
 
