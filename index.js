@@ -27,11 +27,12 @@ const warmCache = require('./lib/warm-cache')
   const app = new Koa()
   app.use(koaBodyParser())
 
-  // Set default cache headers
+  // Set default headers
   app.use((ctx, next) => {
     ctx.set('Cache-Control', ARDENT_API_DEFAULT_CACHE_CONTROL)
     ctx.set('Ardent-API-Version', `${Package.version}`)
     ctx.set('Access-Control-Allow-Origin', '*')
+    ctx.set('X-Robots-Tag: noindex')
     return next()
   })
 
@@ -42,11 +43,16 @@ const warmCache = require('./lib/warm-cache')
   app.listen(ARDENT_API_LOCAL_PORT)
   console.log('Web service online')
 
+  // Run task to warm up the cache every 15 minutes
+  if (process?.env?.NODE_ENV == 'development') {
+    console.log("Cache warming disabled")
+  } else {
+    console.log("Cache warming enabled")
+    cron.schedule('0 */15 * * * *', () => warmCache())
+  }
+
   console.log(printStats())
   console.log('Ardent API ready!')
-
-  // Run task to warm up the cache every 15 minutes
-  cron.schedule('0 */15 * * * *', () => warmCache())
 })()
 
 process.on('exit', () => console.log('Shutting down'))

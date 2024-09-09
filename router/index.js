@@ -6,7 +6,7 @@ const { ARDENT_API_HOSTNAME, ARDENT_DATA_DIR, ARDENT_CACHE_DIR } = require('../l
 const routes = {
   commodities: require('./api/commodities'),
   systems: require('./api/systems')
-  // locations: require('./api/locations')
+  // locations: require('./api/locations') // TODO
 }
 const router = new KoaRouter()
 
@@ -29,8 +29,13 @@ router.get('/api/v1/backup', (ctx, next) => {
   }
 })
 
+// Path is served as '/robots.txt' in production
+// This is used in conjuction with 'X-Robots-Tag: noindex' header
+router.get('/api/robots.txt', (ctx, next) => {
+  ctx.body = `User-agent: *\nDisallow: /`
+})
+
 routes.commodities(router)
 routes.systems(router)
-// routes.locations(router)
 
 module.exports = router
