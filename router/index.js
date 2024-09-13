@@ -29,11 +29,11 @@ router.get('/api/v1/backup', (ctx, next) => {
   }
 })
 
-// Path is served as '/robots.txt' in production
-// This is used in conjuction with 'X-Robots-Tag: noindex' header
-router.get('/api/robots.txt', (ctx, next) => {
-  ctx.body = `User-agent: *\nDisallow: /`
-})
+// Disabled as causes errors in Google Search Console (despite what docs say)
+// Note: Path is served as '/robots.txt' in production
+// router.get('/api/robots.txt', (ctx, next) => {
+//   ctx.body = `User-agent: *\nDisallow: /`
+// })
 
 routes.commodities(router)
 routes.systems(router)

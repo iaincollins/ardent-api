@@ -14,6 +14,7 @@ const process = require('process')
 const path = require('path')
 const fs = require('fs')
 const Koa = require('koa')
+const cors = require('@koa/cors');
 const koaBodyParser = require('koa-bodyparser')
 const cron = require('node-cron')
 
@@ -25,14 +26,14 @@ const warmCache = require('./lib/warm-cache')
   // Start web service
   console.log('Starting web service')
   const app = new Koa()
+  app.use(cors())
   app.use(koaBodyParser())
 
   // Set default headers
   app.use((ctx, next) => {
     ctx.set('Cache-Control', ARDENT_API_DEFAULT_CACHE_CONTROL)
     ctx.set('Ardent-API-Version', `${Package.version}`)
-    ctx.set('Access-Control-Allow-Origin', '*')
-    ctx.set('X-Robots-Tag: noindex')
+    // ctx.set('X-Robots-Tag', 'noindex')
     return next()
   })
 
