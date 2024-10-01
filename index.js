@@ -20,7 +20,7 @@ const cron = require('node-cron')
 
 console.log('Loading libraries …')
 const router = require('./router')
-// const warmCache = require('./lib/warm-cache')
+const warmCache = require('./lib/warm-cache')
 
 ;(async () => {
   // Start web service
@@ -48,10 +48,12 @@ const router = require('./router')
   if (process?.env?.NODE_ENV == 'development') {
     console.log("Cache warming disabled")
   } else {
-    // Disabling cache warming to see if it's still needed
-    // (following the recent hardware upgrade)
-    // console.log("Cache warming enabled")
-    // cron.schedule('0 */15 * * * *', () => warmCache())
+    // Experimented with disabling cache warming after the system upgrade, but
+    // it still makes an appreciable difference to request times and keeps
+    // request times under 1 second, so leaving it on. It takes a bit under
+    // 3 minutes to complete, runnign every 15 minutes seems frequent enough.
+    console.log("Cache warming enabled")
+    cron.schedule('0 */15 * * * *', () => warmCache())
   }
 
   console.log(printStats())
