@@ -2,7 +2,7 @@ const path = require('path')
 const fs = require('fs')
 const KoaRouter = require('koa-router')
 const Package = require('../package.json')
-const { ARDENT_API_HOSTNAME, ARDENT_DATA_DIR, ARDENT_CACHE_DIR } = require('../lib/consts')
+const { ARDENT_API_HOSTNAME, ARDENT_DATA_DIR, ARDENT_CACHE_DIR, ARDENT_BACKUP_DIR } = require('../lib/consts')
 const routes = {
   commodities: require('./api/commodities'),
   systems: require('./api/systems')
@@ -21,7 +21,18 @@ router.get('/api/v1/stats', (ctx, next) => {
 })
 
 router.get('/api/v1/backup', (ctx, next) => {
-  const backups = JSON.parse(fs.readFileSync(path.join(ARDENT_DATA_DIR, 'backup.json')))
+  const backups = JSON.parse(fs.readFileSync(path.join(ARDENT_BACKUP_DIR, 'backup.json')))
+  const downloads = JSON.parse(fs.readFileSync(path.join(ARDENT_BACKUP_DIR, 'backup-downloads.json')))
+
+  for (const database of backups.databases) {
+    database.download = {
+      url: downloads[database.name].url,
+      updated: downloads[database.name].created,
+      size: downloads[database.name].size,
+      sha256: downloads[database.name].sha256
+    }
+  }
+
   ctx.body = {
     started: backups.started,
     completed: backups.completed,
