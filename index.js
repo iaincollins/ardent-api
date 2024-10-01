@@ -20,7 +20,7 @@ const cron = require('node-cron')
 
 console.log('Loading libraries …')
 const router = require('./router')
-const warmCache = require('./lib/warm-cache')
+// const warmCache = require('./lib/warm-cache')
 
 ;(async () => {
   // Start web service
@@ -48,8 +48,10 @@ const warmCache = require('./lib/warm-cache')
   if (process?.env?.NODE_ENV == 'development') {
     console.log("Cache warming disabled")
   } else {
-    console.log("Cache warming enabled")
-    cron.schedule('0 */15 * * * *', () => warmCache())
+    // Disabling cache warming to see if it's still needed
+    // (following the recent hardware upgrade)
+    // console.log("Cache warming enabled")
+    // cron.schedule('0 */15 * * * *', () => warmCache())
   }
 
   console.log(printStats())
