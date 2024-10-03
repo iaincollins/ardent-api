@@ -270,6 +270,19 @@ e.g. https://api.ardent-industry.com/v1/system/name/Sol/commodity/name/gold/near
 * maxDistance (int); default 100, max 500
 * maxDaysAgo (int); default 90
 
+# Get details for a commodity traded in a market by Market ID
+
+Look up a commodity by name that is traded in a specific market, where the
+Market ID is known.
+
+This was added to support providing information about rare goods, which are 
+typically only avalible from a single specific market. Support for additional 
+queries by Market ID may be added in future.
+
+* https://api.ardent-industry.com/v1/market/{marketId}/commodity/name/{commodityName}
+
+e.g. https://api.ardent-industry.com/v1/market/128125432/commodity/name/gold
+
 ## Credits
 
 _This software would not be possible without work from dozens of enthusiasts 
