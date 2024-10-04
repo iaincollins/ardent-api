@@ -10,6 +10,7 @@ const COMMODITIES_REPORT = path.join(ARDENT_CACHE_DIR, 'commodities.json')
 const CORE_SYSTEMS_1000_REPORT = path.join(ARDENT_CACHE_DIR, 'core-systems-1000.json')
 const COLONIA_SYSTEMS_1000_REPORT = path.join(ARDENT_CACHE_DIR, 'colonia-systems-1000.json')
 const MAX_COMMODITY_SORTED_RESULTS = 100
+const MAX_COMMODITY_SEARCH_DISTANCE = 1000
 
 module.exports = (router) => {
   router.get('/api/v1/commodities', async (ctx, next) => {
@@ -50,58 +51,147 @@ module.exports = (router) => {
 
   router.get('/api/v1/commodity/name/:commodityName/imports', async (ctx, next) => {
     const { commodityName } = ctx.params
-    const {
+    let {
       minVolume = 1,
       minPrice = 1,
       fleetCarriers = null,
-      maxDaysAgo = DEFAULT_MAX_RESULTS_AGE
+      maxDaysAgo = DEFAULT_MAX_RESULTS_AGE,
+      systemName = null,
+      maxDistance = null,
     } = ctx.query
+
+    const sqlQueryParams = {
+      commodityName
+    }
+
     const filters = [
-      `AND demand >= ${parseInt(minVolume)}`,
-      `AND sellPrice >= ${parseInt(minPrice)}`,
-      `AND updatedAt > '${getISOTimestamp(`-${maxDaysAgo}`)}'`
+      `AND c.demand >= ${parseInt(minVolume)}`,
+      `AND c.sellPrice >= ${parseInt(minPrice)}`,
+      `AND c.updatedAt > '${getISOTimestamp(`-${maxDaysAgo}`)}'`
     ]
 
-    if (paramAsBoolean(fleetCarriers) !== null) { filters.push(`AND fleetCarrier = ${paramAsInt(fleetCarriers)}`) }
+    if (systemName) {
+      const system = await getSystemByName(systemName)
+      if (!system) return NotFoundResponse(ctx, 'System not found')
+      sqlQueryParams.systemX = system.systemX
+      sqlQueryParams.systemY = system.systemY
+      sqlQueryParams.systemZ = system.systemZ
+
+      if (maxDistance > MAX_COMMODITY_SEARCH_DISTANCE) { maxDistance = MAX_COMMODITY_SEARCH_DISTANCE }
+      maxDistance = parseInt(maxDistance)
+      sqlQueryParams.maxDistance = maxDistance
+    }
+
+    if (paramAsBoolean(fleetCarriers) !== null) { filters.push(`AND c.fleetCarrier = ${paramAsInt(fleetCarriers)}`) }
 
     const commodities = await dbAsync.all(`
-      SELECT * FROM trade.commodities WHERE
-        commodityName = @commodityName COLLATE NOCASE
+      SELECT
+      c.commodityId,
+      c.commodityName,
+      c.stationName,
+      s.stationType,
+      s.distanceToArrival,
+      s.maxLandingPadSize,
+      c.systemName,
+      c.systemX,
+      c.systemY,
+      c.systemZ,
+      c.fleetCarrier,
+      c.buyPrice,
+      c.demand,
+      c.demandBracket,
+      c.meanPrice,
+      c.sellPrice,
+      c.stock,
+      c.stockBracket,
+      c.statusFlags,
+      c.updatedAt
+        ${systemName ? ', ROUND(SQRT(POWER(c.systemX-@systemX,2)+POWER(c.systemY-@systemY,2)+POWER(c.systemZ-@systemZ,2))) AS distance' : ''}
+      FROM trade.commodities c 
+       LEFT JOIN stations.stations s ON c.marketId = s.marketId
+      WHERE c.commodityName = @commodityName COLLATE NOCASE
         ${filters.join(' ')}
-      ORDER BY sellPrice DESC
-        LIMIT ${MAX_COMMODITY_SORTED_RESULTS}`, {
-      commodityName
-    })
+        ${systemName ? ' AND distance <= @maxDistance' : ''}
+      ORDER BY c.sellPrice DESC
+        LIMIT ${MAX_COMMODITY_SORTED_RESULTS}`, sqlQueryParams)
 
     ctx.body = commodities
   })
 
   router.get('/api/v1/commodity/name/:commodityName/exports', async (ctx, next) => {
     const { commodityName } = ctx.params
-    const {
+    let {
       minVolume = 1,
       maxPrice = null,
       fleetCarriers = null,
-      maxDaysAgo = DEFAULT_MAX_RESULTS_AGE
+      maxDaysAgo = DEFAULT_MAX_RESULTS_AGE,
+      systemName = null,
+      maxDistance = null,
     } = ctx.query
+
+    const sqlQueryParams = {
+      commodityName
+    }
+
     const filters = [
-      `AND stock >= ${parseInt(minVolume)}`,
-      `AND updatedAt > '${getISOTimestamp(`-${maxDaysAgo}`)}'`
+      `AND c.stock >= ${parseInt(minVolume)}`,
+      `AND c.updatedAt > '${getISOTimestamp(`-${maxDaysAgo}`)}'`
     ]
 
-    if (maxPrice !== null) { filters.push(`AND buyPrice <= ${parseInt(maxPrice)}`) }
+    if (systemName) {
+      const system = await getSystemByName(systemName)
+      if (!system) return NotFoundResponse(ctx, 'System not found')
+      sqlQueryParams.systemX = system.systemX
+      sqlQueryParams.systemY = system.systemY
+      sqlQueryParams.systemZ = system.systemZ
 
-    if (paramAsBoolean(fleetCarriers) !== null) { filters.push(`AND fleetCarrier = ${paramAsInt(fleetCarriers)}`) }
+      if (maxDistance > MAX_COMMODITY_SEARCH_DISTANCE) { maxDistance = MAX_COMMODITY_SEARCH_DISTANCE }
+      maxDistance = parseInt(maxDistance)
+      sqlQueryParams.maxDistance = maxDistance
+    }
+
+    if (maxPrice !== null) { filters.push(`AND c.buyPrice <= ${parseInt(maxPrice)}`) }
+
+    if (paramAsBoolean(fleetCarriers) !== null) { filters.push(`AND c.fleetCarrier = ${paramAsInt(fleetCarriers)}`) }
 
     const commodities = await dbAsync.all(`
-      SELECT * FROM trade.commodities WHERE
-        commodityName = @commodityName COLLATE NOCASE
+      SELECT
+      c.commodityId,
+      c.commodityName,
+      c.stationName,
+      s.stationType,
+      s.distanceToArrival,
+      s.maxLandingPadSize,
+      c.systemName,
+      c.systemX,
+      c.systemY,
+      c.systemZ,
+      c.fleetCarrier,
+      c.buyPrice,
+      c.demand,
+      c.demandBracket,
+      c.meanPrice,
+      c.sellPrice,
+      c.stock,
+      c.stockBracket,
+      c.statusFlags,
+      c.updatedAt
+        ${systemName ? ', ROUND(SQRT(POWER(c.systemX-@systemX,2)+POWER(c.systemY-@systemY,2)+POWER(c.systemZ-@systemZ,2))) AS distance' : ''}
+      FROM trade.commodities c 
+        LEFT JOIN stations.stations s ON c.marketId = s.marketId
+      WHERE c.commodityName = @commodityName COLLATE NOCASE
         ${filters.join(' ')}
-      ORDER BY buyPrice ASC
-        LIMIT ${MAX_COMMODITY_SORTED_RESULTS}`, {
-      commodityName
-    })
+        ${systemName ? ' AND distance <= @maxDistance' : ''}
+      ORDER BY c.buyPrice ASC
+        LIMIT ${MAX_COMMODITY_SORTED_RESULTS}`, sqlQueryParams)
 
     ctx.body = commodities
   })
+}
+
+async function getSystemByName(systemName) {
+  const system = await dbAsync.all('SELECT * FROM systems.systems WHERE systemName = @systemName COLLATE NOCASE', { systemName })
+  // @FIXME Handle edge cases where there are multiple systems with same name
+  // (This is a very small number and all are unhinhabited, so low priority)
+  return system?.[0]
 }
