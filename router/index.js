@@ -7,6 +7,7 @@ const routes = {
   commodities: require('./api/commodities'),
   systems: require('./api/systems'),
   markets: require('./api/markets'),
+  search: require('./api/search'),
   // locations: require('./api/locations') // TODO
 }
 const router = new KoaRouter()
@@ -50,5 +51,6 @@ router.get('/api/v1/backup', (ctx, next) => {
 routes.commodities(router)
 routes.systems(router)
 routes.markets(router)
+routes.search(router)
 
 module.exports = router
