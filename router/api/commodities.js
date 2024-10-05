@@ -77,9 +77,11 @@ module.exports = (router) => {
       sqlQueryParams.systemY = system.systemY
       sqlQueryParams.systemZ = system.systemZ
 
-      if (maxDistance > MAX_COMMODITY_SEARCH_DISTANCE) { maxDistance = MAX_COMMODITY_SEARCH_DISTANCE }
-      maxDistance = parseInt(maxDistance)
-      sqlQueryParams.maxDistance = maxDistance
+      if (maxDistance) {
+        if (maxDistance > MAX_COMMODITY_SEARCH_DISTANCE) { maxDistance = MAX_COMMODITY_SEARCH_DISTANCE }
+        maxDistance = parseInt(maxDistance)
+        sqlQueryParams.maxDistance = maxDistance
+      }
     }
 
     if (paramAsBoolean(fleetCarriers) !== null) { filters.push(`AND c.fleetCarrier = ${paramAsInt(fleetCarriers)}`) }
@@ -111,7 +113,7 @@ module.exports = (router) => {
        LEFT JOIN stations.stations s ON c.marketId = s.marketId
       WHERE c.commodityName = @commodityName COLLATE NOCASE
         ${filters.join(' ')}
-        ${systemName ? ' AND distance <= @maxDistance' : ''}
+        ${maxDistance ? ' AND distance <= @maxDistance' : ''}
       ORDER BY c.sellPrice DESC
         LIMIT ${MAX_COMMODITY_SORTED_RESULTS}`, sqlQueryParams)
 
@@ -145,9 +147,11 @@ module.exports = (router) => {
       sqlQueryParams.systemY = system.systemY
       sqlQueryParams.systemZ = system.systemZ
 
-      if (maxDistance > MAX_COMMODITY_SEARCH_DISTANCE) { maxDistance = MAX_COMMODITY_SEARCH_DISTANCE }
-      maxDistance = parseInt(maxDistance)
-      sqlQueryParams.maxDistance = maxDistance
+      if (maxDistance) {
+        if (maxDistance > MAX_COMMODITY_SEARCH_DISTANCE) { maxDistance = MAX_COMMODITY_SEARCH_DISTANCE }
+        maxDistance = parseInt(maxDistance)
+        sqlQueryParams.maxDistance = maxDistance
+      }
     }
 
     if (maxPrice !== null) { filters.push(`AND c.buyPrice <= ${parseInt(maxPrice)}`) }
@@ -181,7 +185,7 @@ module.exports = (router) => {
         LEFT JOIN stations.stations s ON c.marketId = s.marketId
       WHERE c.commodityName = @commodityName COLLATE NOCASE
         ${filters.join(' ')}
-        ${systemName ? ' AND distance <= @maxDistance' : ''}
+        ${maxDistance ? ' AND distance <= @maxDistance' : ''}
       ORDER BY c.buyPrice ASC
         LIMIT ${MAX_COMMODITY_SORTED_RESULTS}`, sqlQueryParams)
 
