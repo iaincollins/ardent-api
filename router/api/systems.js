@@ -204,7 +204,7 @@ module.exports = (router) => {
     if (!system) return NotFoundResponse(ctx, 'System not found')
 
     const filters = [
-      `AND c.demand >= ${parseInt(minVolume)}`,
+      `AND (c.demand >= ${parseInt(minVolume)} OR c.demand = 0)`, // Zero is infinite demand
       `AND c.sellPrice >= ${parseInt(minPrice)}`
     ]
 
@@ -314,7 +314,7 @@ module.exports = (router) => {
     if (!systemAddress) return NotFoundResponse(ctx, 'System not found')
 
     const filters = [
-      `AND (c.demand >= ${parseInt(minVolume)} OR c.demand = 0)`, // Zero is infinate demand
+      `AND (c.demand >= ${parseInt(minVolume)} OR c.demand = 0)`, // Zero is infinite demand
       `AND c.sellPrice >= ${parseInt(minPrice)}`
     ]
 

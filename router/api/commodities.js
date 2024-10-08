@@ -110,7 +110,7 @@ module.exports = (router) => {
     }
 
     const filters = [
-      `AND (c.demand >= ${parseInt(minVolume)} OR c.demand = 0)`, // Zero is infinate demand
+      `AND (c.demand >= ${parseInt(minVolume)} OR c.demand = 0)`, // Zero is infinite demand
       `AND c.sellPrice >= ${parseInt(minPrice)}`,
       `AND c.updatedAt > '${getISOTimestamp(`-${maxDaysAgo}`)}'`
     ]
@@ -158,7 +158,7 @@ module.exports = (router) => {
        LEFT JOIN stations.stations s ON c.marketId = s.marketId
       WHERE c.commodityName = @commodityName COLLATE NOCASE
         ${filters.join(' ')}
-        ${maxDistance ? ' AND distance <= @maxDistance' : ''}
+        ${systemName && maxDistance ? ' AND distance <= @maxDistance' : ''}
       ORDER BY c.sellPrice DESC
         LIMIT ${MAX_COMMODITY_SORTED_RESULTS}`, sqlQueryParams)
 
@@ -230,7 +230,7 @@ module.exports = (router) => {
         LEFT JOIN stations.stations s ON c.marketId = s.marketId
       WHERE c.commodityName = @commodityName COLLATE NOCASE
         ${filters.join(' ')}
-        ${maxDistance ? ' AND distance <= @maxDistance' : ''}
+        ${systemName && maxDistance ? ' AND distance <= @maxDistance' : ''}
       ORDER BY c.buyPrice ASC
         LIMIT ${MAX_COMMODITY_SORTED_RESULTS}`, sqlQueryParams)
 
