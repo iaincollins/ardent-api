@@ -154,7 +154,8 @@ module.exports = (router) => {
       SELECT 
         c.commodityId,
         c.commodityName,
-        c.stationName,
+        s.marketId,
+        s.stationName,
         s.stationType,
         s.distanceToArrival,
         s.maxLandingPadSize,
@@ -216,7 +217,8 @@ module.exports = (router) => {
       SELECT 
         c.commodityId,
         c.commodityName,
-        c.stationName,
+        s.marketId,
+        s.stationName,
         s.stationType,
         s.distanceToArrival,
         s.maxLandingPadSize,
@@ -270,7 +272,8 @@ module.exports = (router) => {
       SELECT
         c.commodityId,
         c.commodityName,
-        c.stationName,
+        s.stationName,
+        s.marketId,
         s.stationType,
         s.distanceToArrival,
         s.maxLandingPadSize,
@@ -324,7 +327,8 @@ module.exports = (router) => {
         SELECT
           c.commodityId,
           c.commodityName,
-          c.stationName,
+          s.marketId,
+          s.stationName,
           s.stationType,
           s.distanceToArrival,
           s.maxLandingPadSize,
@@ -390,7 +394,8 @@ module.exports = (router) => {
       SELECT
         c.commodityId,
         c.commodityName,
-        c.stationName,
+        s.marketId,
+        s.stationName,
         s.stationType,
         s.distanceToArrival,
         s.maxLandingPadSize,
