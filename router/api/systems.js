@@ -154,8 +154,8 @@ module.exports = (router) => {
       SELECT 
         c.commodityId,
         c.commodityName,
-        s.marketId,
-        s.stationName,
+        c.marketId,
+        c.stationName,
         s.stationType,
         s.distanceToArrival,
         s.maxLandingPadSize,
@@ -217,8 +217,8 @@ module.exports = (router) => {
       SELECT 
         c.commodityId,
         c.commodityName,
-        s.marketId,
-        s.stationName,
+        c.marketId,
+        c.stationName,
         s.stationType,
         s.distanceToArrival,
         s.maxLandingPadSize,
@@ -272,8 +272,8 @@ module.exports = (router) => {
       SELECT
         c.commodityId,
         c.commodityName,
-        s.stationName,
-        s.marketId,
+        c.marketId,
+        c.stationName,
         s.stationType,
         s.distanceToArrival,
         s.maxLandingPadSize,
@@ -324,38 +324,38 @@ module.exports = (router) => {
     if (paramAsBoolean(fleetCarriers) !== null) { filters.push(`AND c.fleetCarrier = ${paramAsInt(fleetCarriers)}`) }
 
     const commodities = await dbAsync.all(`
-        SELECT
-          c.commodityId,
-          c.commodityName,
-          s.marketId,
-          s.stationName,
-          s.stationType,
-          s.distanceToArrival,
-          s.maxLandingPadSize,
-          c.systemName,
-          c.systemX,
-          c.systemY,
-          c.systemZ,
-          c.fleetCarrier,
-          c.buyPrice,
-          c.demand,
-          c.demandBracket,
-          c.meanPrice,
-          c.sellPrice,
-          c.stock,
-          c.stockBracket,
-          c.statusFlags,
-          c.updatedAt,
-          ROUND(SQRT(POWER(c.systemX-@systemX,2)+POWER(c.systemY-@systemY,2)+POWER(c.systemZ-@systemZ,2))) AS distance
-        FROM trade.commodities c 
-          LEFT JOIN stations.stations s ON c.marketId = s.marketId 
-        WHERE c.commodityName = @commodityName COLLATE NOCASE
-          AND c.systemName != @systemName
-          AND c.updatedAt > '${getISOTimestamp(`-${maxDaysAgo}`)}'
-          AND distance <= @maxDistance
-          ${filters.join(' ')}
-        ORDER BY c.sellPrice DESC
-          LIMIT ${MAX_NEARBY_COMMODITY_RESULTS}`, {
+      SELECT
+        c.commodityId,
+        c.commodityName,
+        c.marketId,
+        c.stationName,
+        s.stationType,
+        s.distanceToArrival,
+        s.maxLandingPadSize,
+        c.systemName,
+        c.systemX,
+        c.systemY,
+        c.systemZ,
+        c.fleetCarrier,
+        c.buyPrice,
+        c.demand,
+        c.demandBracket,
+        c.meanPrice,
+        c.sellPrice,
+        c.stock,
+        c.stockBracket,
+        c.statusFlags,
+        c.updatedAt,
+        ROUND(SQRT(POWER(c.systemX-@systemX,2)+POWER(c.systemY-@systemY,2)+POWER(c.systemZ-@systemZ,2))) AS distance
+      FROM trade.commodities c 
+        LEFT JOIN stations.stations s ON c.marketId = s.marketId 
+      WHERE c.commodityName = @commodityName COLLATE NOCASE
+        AND c.systemName != @systemName
+        AND c.updatedAt > '${getISOTimestamp(`-${maxDaysAgo}`)}'
+        AND distance <= @maxDistance
+        ${filters.join(' ')}
+      ORDER BY c.sellPrice DESC
+        LIMIT ${MAX_NEARBY_COMMODITY_RESULTS}`, {
       commodityName,
       systemX,
       systemY,
@@ -394,8 +394,8 @@ module.exports = (router) => {
       SELECT
         c.commodityId,
         c.commodityName,
-        s.marketId,
-        s.stationName,
+        c.marketId,
+        c.stationName,
         s.stationType,
         s.distanceToArrival,
         s.maxLandingPadSize,
