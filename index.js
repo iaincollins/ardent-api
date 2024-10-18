@@ -6,7 +6,8 @@ console.log('Configuring environment …')
 const {
   ARDENT_CACHE_DIR,
   ARDENT_API_DEFAULT_CACHE_CONTROL,
-  ARDENT_API_LOCAL_PORT
+  ARDENT_API_LOCAL_PORT,
+  SESSION_SECRET
 } = require('./lib/consts')
 
 console.log('Loading dependancies …')
@@ -16,6 +17,7 @@ const fs = require('fs')
 const Koa = require('koa')
 const koaBodyParser = require('koa-bodyparser')
 const cron = require('node-cron')
+const KeyGrip = require('keygrip')
 
 console.log('Loading libraries …')
 const router = require('./router')
@@ -26,10 +28,14 @@ const warmCache = require('./lib/warm-cache')
   console.log('Starting web service')
   const app = new Koa()
   app.use(koaBodyParser())
+  app.keys = new KeyGrip([SESSION_SECRET], 'sha256') // Used to sign cookies
 
   // Set default headers
   app.use((ctx, next) => {
-    ctx.set('Cache-Control', ARDENT_API_DEFAULT_CACHE_CONTROL)
+    // Don't use cache control headers on auth routes 
+    if (!ctx.url.startsWith('/api/auth/') && !ctx.url.startsWith('/auth/')) {
+      ctx.set('Cache-Control', ARDENT_API_DEFAULT_CACHE_CONTROL)
+    }
     ctx.set('Ardent-API-Version', `${Package.version}`)
     ctx.set('Access-Control-Allow-Origin', '*')
     // ctx.set('X-Robots-Tag', 'noindex')
@@ -63,7 +69,7 @@ process.on('exit', () => console.log('Shutting down'))
 
 process.on('uncaughtException', (e) => console.log('Uncaught exception:', e))
 
-function printStats () {
+function printStats() {
   const stats = JSON.parse(fs.readFileSync(path.join(ARDENT_CACHE_DIR, 'database-stats.json')))
 
   try {

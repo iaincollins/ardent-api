@@ -2,8 +2,9 @@ const path = require('path')
 const fs = require('fs')
 const KoaRouter = require('koa-router')
 const Package = require('../package.json')
-const { ARDENT_API_HOSTNAME, ARDENT_DATA_DIR, ARDENT_CACHE_DIR, ARDENT_BACKUP_DIR } = require('../lib/consts')
+const { ARDENT_API_HOSTNAME, ARDENT_CACHE_DIR, ARDENT_BACKUP_DIR } = require('../lib/consts')
 const routes = {
+  auth: require('./api/auth'),
   commodities: require('./api/commodities'),
   systems: require('./api/systems'),
   markets: require('./api/markets'),
@@ -48,6 +49,7 @@ router.get('/api/v1/backup', (ctx, next) => {
 //   ctx.body = `User-agent: *\nDisallow: /`
 // })
 
+routes.auth(router)
 routes.commodities(router)
 routes.systems(router)
 routes.markets(router)
