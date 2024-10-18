@@ -12,24 +12,35 @@ const {
 } = require('../../lib/consts')
 
 const ACCESS_TOKEN_EXPIRES_GRACE_SECONDS = 60 * 5 // How many seconds before a token is due to expire do we treat it as expired
+const SECURE_COOKIES = true
 
 module.exports = (router) => {
   router.get('/api/auth/signin', async (ctx, next) => {
-    const { codeVerifier, codeChallenge } = generateCodeVerifierAndChallenge()
-    const state = generateUrlSafeBase64ByteString()
+    let state = ctx.cookies.get('auth.state')
+    let codeVerifier = ctx.cookies.get('auth.codeVerifier')
+    let codeChallenge = null
 
     // These are saved on client and read back from the client during callback,
     // this avoids having to track state server side.
-    ctx.cookies.set('auth.state', state, { httpOnly: true, domain: AUTH_COOKIE_DOMAIN, signed: true })
-    ctx.cookies.set('auth.codeVerifier', codeVerifier, { httpOnly: true, domain: AUTH_COOKIE_DOMAIN, signed: true })
+    if (!state) {
+      state =  generateUrlSafeBase64ByteString()
+      ctx.cookies.set('auth.state', state, { httpOnly: true, domain: AUTH_COOKIE_DOMAIN, signed: true, secure: SECURE_COOKIES })
+    }
+    if (!codeVerifier) {
+      const codeVerifierAndChallenge = generateCodeVerifierAndChallenge()
+      codeVerifier = codeVerifierAndChallenge.codeVerifier
+      codeChallenge = codeVerifierAndChallenge.codeChallenge
+      ctx.cookies.set('auth.codeVerifier', codeVerifier, { httpOnly: true, domain: AUTH_COOKIE_DOMAIN, signed: true, secure: SECURE_COOKIES })
+    }
+    if (!ctx.cookies.get('auth.csrfToken')) ctx.cookies.set('auth.csrfToken', generateUrlSafeBase64ByteString(), { httpOnly: true, domain: AUTH_COOKIE_DOMAIN, signed: true, secure: SECURE_COOKIES })
 
     const url = `https://auth.frontierstore.net/auth?audience=frontier&scope=auth%20capi`
       + `&response_type=code`
-      + `&client_id=${encodeURIComponent(AUTH_CLIENT_ID)}`
-      + `&code_challenge=${encodeURIComponent(codeChallenge)}`
+      + `&client_id=${AUTH_CLIENT_ID}`
+      + `&code_challenge=${codeChallenge}`
       + `&code_challenge_method=S256`
-      + `&state=${encodeURIComponent(state)}`
-      + `&redirect_uri=${encodeURIComponent(AUTH_CALLBACK_URL)}`
+      + `&state=${state}`
+      + `&redirect_uri=${AUTH_CALLBACK_URL}`
 
     ctx.redirect(url)
   })
@@ -64,7 +75,7 @@ module.exports = (router) => {
         refreshToken: responsePayload['refresh_token']
       })
 
-      ctx.cookies.set('auth.jwt', jwt, { httpOnly: true, domain: AUTH_COOKIE_DOMAIN, maxAge: 1000 * (86400 * 25), signed: true })
+      ctx.cookies.set('auth.jwt', jwt, { httpOnly: true, domain: AUTH_COOKIE_DOMAIN, maxAge: 1000 * (86400 * 25), signed: true, secure: SECURE_COOKIES })
 
       ctx.redirect(AUTH_SUCCESS_URL)
     } catch (e) {
@@ -82,7 +93,7 @@ module.exports = (router) => {
       // and save it back to the existing JWT before returning a response
       if (jwtPayload?.accessTokenExpires < new Date((secondsSinceEpoch() - ACCESS_TOKEN_EXPIRES_GRACE_SECONDS) * 1000).toISOString()) {
         const newJwt = await refreshJwt(jwt)
-        ctx.cookies.set('auth.jwt', newJwt, { httpOnly: true, domain: AUTH_COOKIE_DOMAIN, maxAge: 1000 * (86400 * 25), signed: true })
+        ctx.cookies.set('auth.jwt', newJwt, { httpOnly: true, domain: AUTH_COOKIE_DOMAIN, maxAge: 1000 * (86400 * 25), signed: true, secure: SECURE_COOKIES })
         jwtPayload = verifyJwt(newJwt)
       }
 
@@ -105,9 +116,9 @@ module.exports = (router) => {
   // protection against being forceably signed out.
   router.get('/api/auth/csrftoken', async (ctx, next) => {
     let csrfToken = ctx.cookies.get('auth.csrfToken')
-    if (csrfToken) {
+    if (!csrfToken) {
       csrfToken = generateUrlSafeBase64ByteString()
-      ctx.cookies.set('auth.csrfToken', csrfToken, { httpOnly: true, domain: AUTH_COOKIE_DOMAIN, signed: true })
+      ctx.cookies.set('auth.csrfToken', csrfToken, { httpOnly: true, domain: AUTH_COOKIE_DOMAIN, signed: true, secure: SECURE_COOKIES })
     }
     ctx.body = { csrfToken }
   })
