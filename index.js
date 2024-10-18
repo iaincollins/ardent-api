@@ -38,7 +38,7 @@ const warmCache = require('./lib/warm-cache')
     }
     ctx.set('Ardent-API-Version', `${Package.version}`)
     ctx.set('Access-Control-Allow-Origin', '*')
-    // ctx.set('X-Robots-Tag', 'noindex')
+    ctx.cookies.secure = true // Enables secure cookies when behind HTTP proxy
     return next()
   })
 
