@@ -131,7 +131,7 @@ module.exports = (router) => {
   router.get('/api/auth/cmdr', async (ctx, next) => {
     try {
       const jwtPayload = await verifyAndRefreshJwt(ctx)
-      const response = await fetch(`${FRONTIER_API_BASE_URL}/}`, {
+      const response = await fetch(FRONTIER_API_BASE_URL, {
         headers: { 'Authorization': `${jwtPayload.tokenType} ${jwtPayload.accessToken}` },
       })
       ctx.body = await response.json()
