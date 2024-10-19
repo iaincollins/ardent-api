@@ -14,27 +14,17 @@ const {
 const ACCESS_TOKEN_EXPIRES_GRACE_SECONDS = 60 * 5 // How long before a token is due to expire do we treat it as expired
 const MAX_JWT_AGE_SECONDS = 86400 * 25 // Fdev sessions valid for 25 days max
 const COOKIE_DEFAULT_OPTIONS = { httpOnly: true, domain: AUTH_COOKIE_DOMAIN, signed: true }
-const JWT_COOKIE_OPTIONS = { ...COOKIE_DEFAULT_OPTIONS, maxAge: MAX_JWT_AGE_SECONDS * 1000}
+const JWT_COOKIE_OPTIONS = { ...COOKIE_DEFAULT_OPTIONS, maxAge: MAX_JWT_AGE_SECONDS * 1000 }
 
 module.exports = (router) => {
   router.get('/api/auth/signin', async (ctx, next) => {
-    let state = ctx.cookies.get('auth.state')
-    let codeVerifier = ctx.cookies.get('auth.codeVerifier')
-    let codeChallenge = null
+    const state = generateUrlSafeBase64ByteString()
+    const { codeVerifier, codeChallenge } = generateCodeVerifierAndChallenge()
 
-    // These are saved on client and read back from the client during callback,
-    // this avoids having to track state server side.
-    if (!state) {
-      state = generateUrlSafeBase64ByteString()
-      ctx.cookies.set('auth.state', state, COOKIE_DEFAULT_OPTIONS)
-    }
-    if (!codeVerifier) {
-      const codeVerifierAndChallenge = generateCodeVerifierAndChallenge()
-      codeVerifier = codeVerifierAndChallenge.codeVerifier
-      codeChallenge = codeVerifierAndChallenge.codeChallenge
-      ctx.cookies.set('auth.codeVerifier', codeVerifier, COOKIE_DEFAULT_OPTIONS)
-    }
-    if (!ctx.cookies.get('auth.csrfToken')) ctx.cookies.set('auth.csrfToken', generateUrlSafeBase64ByteString(), COOKIE_DEFAULT_OPTIONS)
+    // These are re-geneated for every sign in attempt to avoid possibility of
+    // reuse of stale tokens after a failed / previous login attempt
+    ctx.cookies.set('auth.state', state, COOKIE_DEFAULT_OPTIONS)
+    ctx.cookies.set('auth.codeVerifier', codeVerifier, COOKIE_DEFAULT_OPTIONS)
 
     const url = `https://auth.frontierstore.net/auth?audience=frontier&scope=auth%20capi`
       + `&response_type=code`
@@ -135,7 +125,11 @@ module.exports = (router) => {
     try {
       const csrfTokenFromCookie = ctx.cookies.get('auth.csrfToken')
       if (csrfToken !== csrfTokenFromCookie) throw new Error('CSRF token validation failed')
-      ctx.cookies.set('auth.jwt', null, COOKIE_DEFAULT_OPTIONS) // Matching options (other than expiry) are required for cookie to be unset
+      // Matching options (other than expiry) are required for cookies to be unset
+      ctx.cookies.set('auth.jwt', null, COOKIE_DEFAULT_OPTIONS)
+      ctx.cookies.set('auth.state', null, COOKIE_DEFAULT_OPTIONS)
+      ctx.cookies.set('auth.codeVerifier', null, COOKIE_DEFAULT_OPTIONS)
+      ctx.cookies.set('auth.csrfToken', null, COOKIE_DEFAULT_OPTIONS)
       ctx.redirect(AUTH_SIGNED_OUT_URL)
     } catch (e) {
       ctx.redirect(`${AUTH_ERROR_URL}?error=${encodeURIComponent(e?.toString())}`)
