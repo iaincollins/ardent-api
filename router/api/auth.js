@@ -126,11 +126,11 @@ module.exports = (router) => {
   })
 
   router.post('/api/auth/signout', async (ctx, next) => {
-    const { csrfToken } = ctx.query
+    const { csrfToken } = ctx.request.body
     try {
       const csrfTokenFromCookie = ctx.cookies.get('auth.csrfToken')
       if (csrfToken !== csrfTokenFromCookie) throw new Error('CSRF token validation failed')
-      ctx.cookies.set('auth.jwt', '')
+      ctx.cookies.set('auth.jwt', null, COOKIE_DEFAULT_OPTIONS) // Matching options (other than expiry) are required for cookie to be unset
       ctx.redirect(AUTH_SIGNED_OUT_URL)
     } catch (e) {
       ctx.redirect(`${AUTH_ERROR_URL}?error=${encodeURIComponent(e?.toString())}`)
