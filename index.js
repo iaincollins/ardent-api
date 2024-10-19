@@ -37,7 +37,14 @@ const warmCache = require('./lib/warm-cache')
       ctx.set('Cache-Control', ARDENT_API_DEFAULT_CACHE_CONTROL)
     }
     ctx.set('Ardent-API-Version', `${Package.version}`)
-    ctx.set('Access-Control-Allow-Origin', '*')
+
+    // Headers required to support requests with credentials (i.e. auth tokens)
+    // while still supporting API requests from any domain
+    ctx.set('Access-Control-Allow-Origin', ctx.origin)
+    ctx.set('Access-Control-Allow-Credentials', true)
+    ctx.set('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')
+    ctx.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+    
     ctx.cookies.secure = true // Enables secure cookies when behind HTTP proxy
     return next()
   })

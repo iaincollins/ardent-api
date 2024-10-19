@@ -14,7 +14,7 @@ const {
 const ACCESS_TOKEN_EXPIRES_GRACE_SECONDS = 60 * 5 // How long before a token is due to expire do we treat it as expired
 const MAX_JWT_AGE_SECONDS = 86400 * 25 // Fdev sessions valid for 25 days max
 const COOKIE_DEFAULT_OPTIONS = { httpOnly: true, domain: AUTH_COOKIE_DOMAIN, signed: true }
-const JWT_COOKIE_OPTIONS = { ...COOKIE_DEFAULT_OPTIONS, maxAge: 1000 * MAX_JWT_AGE_SECONDS }
+const JWT_COOKIE_OPTIONS = { ...COOKIE_DEFAULT_OPTIONS, maxAge: MAX_JWT_AGE_SECONDS * 1000}
 
 module.exports = (router) => {
   router.get('/api/auth/signin', async (ctx, next) => {
