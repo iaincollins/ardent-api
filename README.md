@@ -283,6 +283,15 @@ Support for additional queries by market ID may be added in future.
 
 e.g. https://api.ardent-industry.com/v1/market/128106744/commodity/name/lavianbrandy
 
+## Authentication
+
+Experimental support for authentication with Frontier Accounts has been added.
+
+This is not used for anything yet but the goal is to leverage Frontier's API to
+enable additional functionality.
+
+https://github.com/EDCD/FDevIDs/tree/master/Frontier%20API
+
 ## Credits
 
 _This software would not be possible without work from dozens of enthusiasts 
