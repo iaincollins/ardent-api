@@ -15,6 +15,7 @@ const ACCESS_TOKEN_EXPIRES_GRACE_SECONDS = 60 * 5 // How long before a token is 
 const MAX_JWT_AGE_SECONDS = 86400 * 25 // Fdev sessions valid for 25 days max
 const COOKIE_DEFAULT_OPTIONS = { httpOnly: true, domain: AUTH_COOKIE_DOMAIN, signed: true }
 const JWT_COOKIE_OPTIONS = { ...COOKIE_DEFAULT_OPTIONS, maxAge: MAX_JWT_AGE_SECONDS * 1000 }
+const FRONTIER_API_BASE_URL = 'https://companion.orerve.net'
 
 module.exports = (router) => {
   router.get('/api/auth/signin', async (ctx, next) => {
@@ -83,7 +84,7 @@ module.exports = (router) => {
   router.get('/api/auth/token', async (ctx, next) => {
     try {
       const jwt = ctx.cookies.get('auth.jwt')
-      if (!jwt) throw new Error('No JWT found')
+      if (!jwt) throw new Error('No JWT found. Not signed in.')
       let jwtPayload = verifyJwt(jwt)
 
       // If Access Token has expired (or is about to...) then get a new one
@@ -134,6 +135,52 @@ module.exports = (router) => {
     } catch (e) {
       ctx.redirect(`${AUTH_ERROR_URL}?error=${encodeURIComponent(e?.toString())}`)
       return
+    }
+  })
+
+  // The root endpoint lists all the other endpoints supported by Frontier's API
+  router.get('/api/auth/cmdr', async (ctx, next) => {
+    try {
+      let jwtPayload = verifyJwt(jwt)
+      if (jwtPayload?.accessTokenExpires < new Date((secondsSinceEpoch() - ACCESS_TOKEN_EXPIRES_GRACE_SECONDS) * 1000).toISOString()) {
+        const newJwt = await refreshJwt(jwt)
+        ctx.cookies.set('auth.jwt', newJwt, JWT_COOKIE_OPTIONS)
+        jwtPayload = verifyJwt(newJwt)
+      }
+      const response = await fetch(`${FRONTIER_API_BASE_URL}/}`, {
+        headers: { 'Authorization': `${jwtPayload.tokenType} ${jwtPayload.accessToken}` },
+      })
+      ctx.body = await response.json()
+    } catch (e) {
+      ctx.status = 500
+      ctx.body = {
+        error: 'Frontier API request failed',
+        message: e?.toString(),
+      }
+    }
+  })
+
+  // TODO May explicitly list supported endpoints allowed in future, but
+  // for now will allow requests with any valid token to be passed
+  router.get('/api/auth/cmdr/:endpoint', async (ctx, next) => {
+    try {
+      let jwtPayload = verifyJwt(jwt)
+      if (jwtPayload?.accessTokenExpires < new Date((secondsSinceEpoch() - ACCESS_TOKEN_EXPIRES_GRACE_SECONDS) * 1000).toISOString()) {
+        const newJwt = await refreshJwt(jwt)
+        ctx.cookies.set('auth.jwt', newJwt, JWT_COOKIE_OPTIONS)
+        jwtPayload = verifyJwt(newJwt)
+      }
+      const { endpoint } = ctx.params
+      const response = await fetch(`${FRONTIER_API_BASE_URL}/${endpoint}`, {
+        headers: { 'Authorization': `${jwtPayload.tokenType} ${jwtPayload.accessToken}` },
+      })
+      ctx.body = await response.json()
+    } catch (e) {
+      ctx.status = 500
+      ctx.body = {
+        error: 'Frontier API request failed',
+        message: e?.toString(),
+      }
     }
   })
 }
