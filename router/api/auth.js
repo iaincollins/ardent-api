@@ -83,18 +83,7 @@ module.exports = (router) => {
 
   router.get('/api/auth/token', async (ctx, next) => {
     try {
-      const jwt = ctx.cookies.get('auth.jwt')
-      if (!jwt) throw new Error('No JWT found. Not signed in.')
-      let jwtPayload = verifyJwt(jwt)
-
-      // If Access Token has expired (or is about to...) then get a new one
-      // and save it back to the existing JWT before returning a response
-      if (jwtPayload?.accessTokenExpires < new Date((secondsSinceEpoch() - ACCESS_TOKEN_EXPIRES_GRACE_SECONDS) * 1000).toISOString()) {
-        const newJwt = await refreshJwt(jwt)
-        ctx.cookies.set('auth.jwt', newJwt, JWT_COOKIE_OPTIONS)
-        jwtPayload = verifyJwt(newJwt)
-      }
-
+      const jwtPayload = await verifyAndRefreshJwt(ctx)
       ctx.body = {
         accessToken: jwtPayload.accessToken,
         expires: jwtPayload.accessTokenExpires
@@ -141,12 +130,7 @@ module.exports = (router) => {
   // The root endpoint lists all the other endpoints supported by Frontier's API
   router.get('/api/auth/cmdr', async (ctx, next) => {
     try {
-      let jwtPayload = verifyJwt(jwt)
-      if (jwtPayload?.accessTokenExpires < new Date((secondsSinceEpoch() - ACCESS_TOKEN_EXPIRES_GRACE_SECONDS) * 1000).toISOString()) {
-        const newJwt = await refreshJwt(jwt)
-        ctx.cookies.set('auth.jwt', newJwt, JWT_COOKIE_OPTIONS)
-        jwtPayload = verifyJwt(newJwt)
-      }
+      const jwtPayload = await verifyAndRefreshJwt(ctx)
       const response = await fetch(`${FRONTIER_API_BASE_URL}/}`, {
         headers: { 'Authorization': `${jwtPayload.tokenType} ${jwtPayload.accessToken}` },
       })
@@ -164,12 +148,7 @@ module.exports = (router) => {
   // for now will allow requests with any valid token to be passed
   router.get('/api/auth/cmdr/:endpoint', async (ctx, next) => {
     try {
-      let jwtPayload = verifyJwt(jwt)
-      if (jwtPayload?.accessTokenExpires < new Date((secondsSinceEpoch() - ACCESS_TOKEN_EXPIRES_GRACE_SECONDS) * 1000).toISOString()) {
-        const newJwt = await refreshJwt(jwt)
-        ctx.cookies.set('auth.jwt', newJwt, JWT_COOKIE_OPTIONS)
-        jwtPayload = verifyJwt(newJwt)
-      }
+      const jwtPayload = await verifyAndRefreshJwt(ctx)
       const { endpoint } = ctx.params
       const response = await fetch(`${FRONTIER_API_BASE_URL}/${endpoint}`, {
         headers: { 'Authorization': `${jwtPayload.tokenType} ${jwtPayload.accessToken}` },
@@ -220,10 +199,24 @@ function verifyJwt(jwt) {
   return jsonWebToken.verify(jwt, AUTH_JWT_SECRET)
 }
 
-async function refreshJwt(jwt) {
-  const jwtPayload = verifyJwt(jwt)
+async function verifyAndRefreshJwt(ctx) {
+  const jwt = ctx.cookies.get('auth.jwt')
+  if (!jwt) throw new Error('No JWT found. Not signed in.')
 
-  // Request new tokens from fdev, using refresh token
+  // Conditionally update token if the current access token has expired
+  // (or will soon expire, before it is used).
+  let jwtPayload = verifyJwt(jwt) // Call verify to check is valid and get payload
+  if (jwtPayload?.accessTokenExpires < new Date((secondsSinceEpoch() - ACCESS_TOKEN_EXPIRES_GRACE_SECONDS) * 1000).toISOString()) {
+    const newJwt = await refreshJwt(jwtPayload) // Use Refresh Token to get new Access Token (will also be given a new Refresh Token)
+    ctx.cookies.set('auth.jwt', newJwt, JWT_COOKIE_OPTIONS)
+    jwtPayload = verifyJwt(newJwt) // Call verify again to get payload
+  }
+
+  return jwtPayload
+}
+
+async function refreshJwt(jwtPayload) {
+  // Request new tokens from Frontier using a Refresh Token
   const response = await fetch('https://auth.frontierstore.net/token', {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
