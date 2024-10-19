@@ -33,11 +33,13 @@ const warmCache = require('./lib/warm-cache')
 
   // Set default headers
   app.use((ctx, next) => {
-    // Don't use cache control headers on auth routes 
-    if (!ctx.url.startsWith('/api/auth/') && !ctx.url.startsWith('/auth/')) {
-      ctx.set('Cache-Control', ARDENT_API_DEFAULT_CACHE_CONTROL)
-    }
     ctx.set('Ardent-API-Version', `${Package.version}`)
+
+    // Don't use cache control headers on auth routes 
+    // if (!ctx.url.startsWith('/api/auth/') && !ctx.url.startsWith('/auth/')) {
+    //   ctx.set('Cache-Control', ARDENT_API_DEFAULT_CACHE_CONTROL)
+    // }
+    ctx.set('Vary', '*')
 
     // Headers required to support requests with credentials (i.e. auth tokens)
     // while still supporting API requests from any domain
@@ -45,7 +47,7 @@ const warmCache = require('./lib/warm-cache')
     ctx.set('Access-Control-Allow-Credentials', true)
     ctx.set('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')
     ctx.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
-    
+
     ctx.cookies.secure = true // Enables secure cookies when behind HTTP proxy
     return next()
   })
