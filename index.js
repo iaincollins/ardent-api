@@ -29,6 +29,7 @@ const warmCache = require('./lib/warm-cache')
   const app = new Koa()
   app.use(koaBodyParser())
   app.keys = new KeyGrip([SESSION_SECRET], 'sha256') // Used to sign cookies
+  app.proxy = true // Proxy headers should be passed through
 
   // Set default headers
   app.use((ctx, next) => {
@@ -40,7 +41,7 @@ const warmCache = require('./lib/warm-cache')
 
     // Headers required to support requests with credentials (i.e. auth tokens)
     // while still supporting API requests from any domain
-    ctx.set('Access-Control-Allow-Origin', ctx.origin)
+    ctx.set('Access-Control-Allow-Origin', ctx.request.header.origin)
     ctx.set('Access-Control-Allow-Credentials', true)
     ctx.set('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')
     ctx.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
