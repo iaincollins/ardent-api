@@ -69,6 +69,11 @@ module.exports = (router) => {
       })
       const responsePayload = await response.json()
 
+      if (!responsePayload['token_type']) {
+        console.error('Sign in callback received unexpected response', responsePayload)
+        throw new Error('Sign in callback received unexpected response')
+      }
+
       // Create JWT to store tokens
       const jwt = createJwt({
         tokenType: responsePayload['token_type'],
@@ -189,6 +194,11 @@ async function refreshJwt(jwt) {
     })
   })
   const responsePayload = await response.json()
+
+  if (!responsePayload['token_type']) {
+    console.error('Token refresh received unexpected response', responsePayload)
+    throw new Error('Token refresh received unexpected response')
+  }
 
   // Preserve any data in the old token (except properties below)
   const oldJwtPayload = { ...jwtPayload }
