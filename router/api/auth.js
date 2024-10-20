@@ -246,7 +246,7 @@ async function refreshJwt(jwtPayload) {
   // Request new tokens from Frontier using a Refresh Token
   const response = await fetch('https://auth.frontierstore.net/token', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: formData({
       'client_id': AUTH_CLIENT_ID,
       'redirect_uri': AUTH_CALLBACK_URL,
@@ -259,10 +259,9 @@ async function refreshJwt(jwtPayload) {
   if (responsePayload?.error) {
     if (responsePayload?.error === 'invalid_token') {
       // The Access Token is valid for 4 hours, you can get a new one using a
-      // Refresh Token. How long the Refresh Token is valid for is not
-      // documented but it's less 12 hours. When it has expired the Frontier
-      // API returns this invalid_token message.
-      throw new Error('Frontier Refresh Token has expired')
+      // Refresh Token. When it has expired the Frontier API returns an
+      // invalid_token error.
+      throw new Error('Frontier API Refresh Token has expired')
     } else {
       console.error('Error response returned by Frontier API while refreshing Access Token', responsePayload)
       throw new Error(`Error response returned by Frontier API while refreshing Access Token: ${responsePayload?.error}, ${responsePayload?.error_description}`)
