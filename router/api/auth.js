@@ -162,6 +162,23 @@ module.exports = (router) => {
       }
     }
   })
+
+  router.get('/api/auth/cmdr/journal/:year/:month/:day', async (ctx, next) => {
+    try {
+      const jwtPayload = await verifyAndRefreshJwt(ctx)
+      const { year, month, day } = ctx.params
+      const response = await fetch(`${FRONTIER_API_BASE_URL}/journal/${year}/${month}/${day}`, {
+        headers: { 'Authorization': `${jwtPayload.tokenType} ${jwtPayload.accessToken}` },
+      })
+      ctx.body = await response.json()
+    } catch (e) {
+      ctx.status = 500
+      ctx.body = {
+        error: 'Frontier API request failed',
+        message: e?.toString(),
+      }
+    }
+  })
 }
 
 /*** Functions ***/
