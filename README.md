@@ -46,6 +46,12 @@ and improves response times. You can still request to include older data by
 explicitly specifying a greater value. Records are updated when newer 
 information is submitted, but older entries never expire.
 
+The endpoints are versioned but there may still be changes in the logic of how 
+requests are handled and exactly what data returned in response to a query as 
+functionality is expanded on and refined (e.g. what results are filtered out, 
+or not filterd out, by default may change - but any changes to requests or 
+responses should typically be additive rather than be breaking changes).
+
 ### Get version
 
 Get Ardent API software version.
@@ -291,6 +297,9 @@ This is not used for anything yet but the goal is to leverage Frontier's API to
 enable additional functionality.
 
 https://github.com/EDCD/FDevIDs/tree/master/Frontier%20API
+
+Note: The Authentication API endpoints are unversioned and should be regarded 
+as for internal only.
 
 ## Credits
 

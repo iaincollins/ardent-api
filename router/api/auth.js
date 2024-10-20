@@ -60,9 +60,12 @@ module.exports = (router) => {
       })
       const responsePayload = await response.json()
 
-      if (!responsePayload['token_type']) {
-        console.error('Sign in callback received unexpected response', responsePayload)
-        throw new Error('Sign in callback received unexpected response')
+      if (!responsePayload?.['token_type']
+        || !responsePayload?.['access_token']
+        || !responsePayload?.['expires_in']
+        || !responsePayload?.['refresh_token']) {
+        console.error('Frontier API returned unexpected response to Sign In request', responsePayload)
+        throw new Error('Frontier API returned unexpected response to Sign In request')
       }
 
       // Create JWT to store tokens
@@ -91,7 +94,7 @@ module.exports = (router) => {
     } catch (e) {
       ctx.status = 400
       ctx.body = {
-        error: 'Failed to get token',
+        error: 'Failed to get Frontier API Access Token',
         message: e?.toString(),
       }
     }
@@ -252,9 +255,20 @@ async function refreshJwt(jwtPayload) {
   })
   const responsePayload = await response.json()
 
-  if (!responsePayload['token_type']) {
-    console.error('Token refresh received unexpected response', responsePayload)
-    throw new Error('Token refresh received unexpected response')
+  if (responsePayload?.error) {
+    if (responsePayload?.error === 'invalid_token') {
+      // The Access Token is valid for 4 hours, you can get a new one using a
+      // Refresh Token. How long the Refresh Token is valid for is not
+      // documented but it's less 12 hours. When it has expired the Frontier
+      // API returns this invalid_token message.
+      throw new Error('Frontier Refresh Token has expired')
+    } else {
+      console.error('Error response returned by Frontier API while refreshing Access Token', responsePayload)
+      throw new Error(`Error response returned by Frontier API while refreshing Access Token: ${responsePayload?.error}, ${responsePayload?.error_description}`)
+    }
+  } else if (!responsePayload['token_type']) {
+    console.error('Unexpected response returned by Frontier API while refreshing Access Token', responsePayload)
+    throw new Error('Unexpected response returned by Frontier API while refreshing Access Token')
   }
 
   // Preserve any data in the old token (except properties below)
