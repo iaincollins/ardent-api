@@ -35,14 +35,21 @@ const warmCache = require('./lib/warm-cache')
   app.use((ctx, next) => {
     ctx.set('Ardent-API-Version', `${Package.version}`)
 
+    /*
     if (ctx.url.startsWith('/api/auth/') || ctx.url.startsWith('/auth/')) {
+      console.log('no cache')
       // Auth responses should not be cached
       ctx.set('Vary', '*')
       ctx.set('Cache-Control', 'private')
     } else {
+      console.log('cache')
       ctx.set('Cache-Control', ARDENT_API_DEFAULT_CACHE_CONTROL)
     }
+    */
  
+    ctx.set('Vary', '*')
+    ctx.set('Cache-Control', 'private')
+
     // Headers required to support requests with credentials (i.e. auth tokens)
     // while still supporting API requests from any domain
     ctx.set('Access-Control-Allow-Origin', ctx.request.header.origin)
