@@ -153,7 +153,13 @@ module.exports = (router) => {
       const response = await fetch(`${FRONTIER_API_BASE_URL}/${endpoint}`, {
         headers: { 'Authorization': `${jwtPayload.tokenType} ${jwtPayload.accessToken}` },
       })
-      ctx.body = await response.json()
+      if (endpoint === 'journal') {
+        ctx.body = await response.text()
+      } else if (endpoint === 'visitedstars') {
+        ctx.body = await response.blob()
+      } else {
+        ctx.body = await response.json()
+      }
     } catch (e) {
       ctx.status = 500
       ctx.body = {
@@ -170,7 +176,7 @@ module.exports = (router) => {
       const response = await fetch(`${FRONTIER_API_BASE_URL}/journal/${year}/${month}/${day}`, {
         headers: { 'Authorization': `${jwtPayload.tokenType} ${jwtPayload.accessToken}` },
       })
-      ctx.body = await response.json()
+      ctx.body = await response.text()
     } catch (e) {
       ctx.status = 500
       ctx.body = {
