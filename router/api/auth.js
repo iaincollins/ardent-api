@@ -226,13 +226,14 @@ function verifyJwt(jwt) {
 }
 
 async function verifyAndRefreshJwt(ctx) {
+  const { forceRefresh = false } = ctx.query
   const jwt = ctx.cookies.get('auth.jwt')
   if (!jwt) throw new Error('No JWT found. Not signed in.')
 
   // Conditionally update token if the current access token has expired
   // (or will soon expire, before it is used).
   let jwtPayload = verifyJwt(jwt) // Call verify to check is valid and get payload
-  if (jwtPayload?.accessTokenExpires < new Date((secondsSinceEpoch() - ACCESS_TOKEN_EXPIRES_GRACE_SECONDS) * 1000).toISOString()) {
+  if (forceRefresh === 'true' || (jwtPayload?.accessTokenExpires < new Date((secondsSinceEpoch() - ACCESS_TOKEN_EXPIRES_GRACE_SECONDS) * 1000).toISOString())) {
     const newJwt = await refreshJwt(jwtPayload) // Use Refresh Token to get new Access Token (will also be given a new Refresh Token)
     ctx.cookies.set('auth.jwt', newJwt, JWT_COOKIE_OPTIONS)
     jwtPayload = verifyJwt(newJwt) // Call verify again to get payload
