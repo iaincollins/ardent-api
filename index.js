@@ -35,6 +35,9 @@ const warmCache = require('./lib/warm-cache')
   app.use((ctx, next) => {
     ctx.set('Ardent-API-Version', `${Package.version}`)
 
+    // TODO Conditional cache headers - This implementation seems to be causing 
+    // an issue with the reverse proxy that handles SSL, so I'm leaving it
+    // disabled for now and may split off auth into a seperate service/hostname. 
     /*
     if (ctx.url.startsWith('/api/auth/') || ctx.url.startsWith('/auth/')) {
       console.log('no cache')

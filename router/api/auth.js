@@ -49,7 +49,7 @@ module.exports = (router) => {
       // Request tokens from fdev
       const response = await fetch('https://auth.frontierstore.net/token', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: formData({
           'client_id': AUTH_CLIENT_ID,
           'redirect_uri': AUTH_CALLBACK_URL,
@@ -249,7 +249,6 @@ async function refreshJwt(jwtPayload) {
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: formData({
       'client_id': AUTH_CLIENT_ID,
-      'redirect_uri': AUTH_CALLBACK_URL,
       'grant_type': 'refresh_token',
       'refresh_token': jwtPayload.refreshToken
     })
