@@ -258,8 +258,8 @@ async function refreshJwt(jwtPayload) {
   if (responsePayload?.error) {
     if (responsePayload?.error === 'invalid_token') {
       // The Access Token is valid for 4 hours, you can get a new one using a
-      // Refresh Token. When it has expired the Frontier API returns an
-      // invalid_token error.
+      // Refresh Token. When the Refresh Token itself has expired the Frontier
+      // API returns an invalid_token error.
       throw new Error('Frontier API Refresh Token has expired')
     } else {
       console.error('Error response returned by Frontier API while refreshing Access Token', responsePayload)
