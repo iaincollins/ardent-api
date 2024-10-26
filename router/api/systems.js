@@ -251,7 +251,7 @@ module.exports = (router) => {
     const {
       minVolume = 1,
       maxPrice = null,
-      fleetCarriers = null,
+      fleetCarriers = null
     } = ctx.query
 
     // Validate system name

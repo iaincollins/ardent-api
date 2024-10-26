@@ -34,7 +34,7 @@ module.exports = (router) => {
         WHERE c.marketId = @marketId
         AND (c.demand > 1000 OR c.demand = 0)
         AND c.demandBracket = 3
-        AND c.updatedAt > '${getISOTimestamp(`-1`)}'
+        AND c.updatedAt > '${getISOTimestamp('-1')}'
       ORDER BY c.sellPrice DESC
       LIMIT 5`, { marketId: station.marketId })
       if (stationImport) imports.push(stationImport)
@@ -47,18 +47,18 @@ module.exports = (router) => {
         WHERE c.marketId = @marketId
         AND c.stock > 1000
         AND c.stockBracket = 3
-        AND c.updatedAt > '${getISOTimestamp(`-1`)}'
+        AND c.updatedAt > '${getISOTimestamp('-1')}'
       ORDER BY c.buyPrice DESC
       LIMIT 5`, { marketId: station.marketId })
       if (stationExport) exports.push(stationExport)
     }
 
     const result = [
-        ...imports,
-        ...exports,
-      ].sort((a, b) => a.updatedAt.localeCompare(b.updatedAt)) // Sort results by recency
+      ...imports,
+      ...exports
+    ].sort((a, b) => a.updatedAt.localeCompare(b.updatedAt)) // Sort results by recency
       .filter((obj1, i, arr) => arr.findIndex(obj2 => (obj2.marketId === obj1.marketId)) === i) // Filter so only one entry for each station
-    
+
     ctx.body = result
   })
 
@@ -102,7 +102,7 @@ module.exports = (router) => {
       fleetCarriers = null,
       maxDaysAgo = DEFAULT_MAX_RESULTS_AGE,
       systemName = null,
-      maxDistance = null,
+      maxDistance = null
     } = ctx.query
 
     const sqlQueryParams = {
@@ -174,7 +174,7 @@ module.exports = (router) => {
       fleetCarriers = null,
       maxDaysAgo = DEFAULT_MAX_RESULTS_AGE,
       systemName = null,
-      maxDistance = null,
+      maxDistance = null
     } = ctx.query
 
     const sqlQueryParams = {
@@ -240,7 +240,7 @@ module.exports = (router) => {
   })
 }
 
-async function getSystemByName(systemName) {
+async function getSystemByName (systemName) {
   const system = await dbAsync.all('SELECT * FROM systems.systems WHERE systemName = @systemName COLLATE NOCASE', { systemName })
   // @FIXME Handle edge cases where there are multiple systems with same name
   // (This is a very small number and all are unhinhabited, so low priority)

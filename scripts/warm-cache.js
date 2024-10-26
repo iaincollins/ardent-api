@@ -1,5 +1,5 @@
 const warmCache = require('../lib/warm-cache')
 ;(async () => {
-  await warmCache({debug: true})
+  await warmCache({ debug: true })
   process.exit()
 })()

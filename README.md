@@ -2,8 +2,15 @@
 
 The Ardent API powers [ardent-industry.com](https://ardent-industry.com)
 
-The API is considered stable and no breaking changes are anticipated, but
-expansion of parameters that be passed and enrichment of responses is planned.
+The API is considered fairly stable and no breaking changes are anticipated,
+but expect evolution of parameters that can be passed and enrichment of
+responses. In some cases the internal logic for routes may evolve over time.
+
+More information about Ardent:
+
+* https://github.com/iaincollins/ardent-www
+* https://github.com/iaincollins/ardent-collector
+* https://github.com/iaincollins/ardent-auth
 
 ## About this software
 
@@ -291,15 +298,10 @@ e.g. https://api.ardent-industry.com/v1/market/128106744/commodity/name/lavianbr
 
 ## Authentication
 
-Experimental support for authentication with Frontier Accounts has been added.
+All of the routes handled by this API are anonymous.
 
-This is not used for anything yet but the goal is to leverage Frontier's API to
-enable additional functionality.
-
-https://github.com/EDCD/FDevIDs/tree/master/Frontier%20API
-
-Note: The Authentication API endpoints are unversioned and should be regarded 
-as for internal only.
+The [Authentication service](https://github.com/iaincollins/ardent-auth) for 
+Ardent handles calls to all API routes that involve authentication.
 
 ## Credits
 

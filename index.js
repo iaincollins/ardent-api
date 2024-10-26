@@ -1,13 +1,12 @@
 const Package = require('./package.json')
-console.log(`Ardent Collector v${Package.version} starting`)
+console.log(`Ardent API v${Package.version} starting`)
 
 // Initalise default value for env vars before other imports
 console.log('Configuring environment …')
 const {
   ARDENT_CACHE_DIR,
   ARDENT_API_DEFAULT_CACHE_CONTROL,
-  ARDENT_API_LOCAL_PORT,
-  SESSION_SECRET
+  ARDENT_API_LOCAL_PORT
 } = require('./lib/consts')
 
 console.log('Loading dependancies …')
@@ -17,7 +16,6 @@ const fs = require('fs')
 const Koa = require('koa')
 const koaBodyParser = require('koa-bodyparser')
 const cron = require('node-cron')
-const KeyGrip = require('keygrip')
 
 console.log('Loading libraries …')
 const router = require('./router')
@@ -25,42 +23,23 @@ const warmCache = require('./lib/warm-cache')
 
 ;(async () => {
   // Start web service
-  console.log('Starting web service')
+  console.log('Starting Ardent API service')
   const app = new Koa()
   app.use(koaBodyParser())
-  app.keys = new KeyGrip([SESSION_SECRET], 'sha256') // Used to sign cookies
   app.proxy = true // Proxy headers should be passed through
 
   // Set default headers
   app.use((ctx, next) => {
     ctx.set('Ardent-API-Version', `${Package.version}`)
 
-    // TODO Conditional cache headers - This implementation seems to be causing 
-    // an issue with the reverse proxy that handles SSL, so I'm leaving it
-    // disabled for now and may split off auth into a seperate service/hostname. 
-    /*
-    if (ctx.url.startsWith('/api/auth/') || ctx.url.startsWith('/auth/')) {
-      console.log('no cache')
-      // Auth responses should not be cached
-      ctx.set('Vary', '*')
-      ctx.set('Cache-Control', 'private')
-    } else {
-      console.log('cache')
-      ctx.set('Cache-Control', ARDENT_API_DEFAULT_CACHE_CONTROL)
-    }
-    */
- 
-    ctx.set('Vary', '*')
-    ctx.set('Cache-Control', 'private')
+    // Cache headers encourage caching, but with a short period (and use of state-while-revalidate)
+    ctx.set('Cache-Control', ARDENT_API_DEFAULT_CACHE_CONTROL)
 
     // Headers required to support requests with credentials (i.e. auth tokens)
     // while still supporting API requests from any domain
     ctx.set('Access-Control-Allow-Origin', ctx.request.header.origin)
-    ctx.set('Access-Control-Allow-Credentials', true)
     ctx.set('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')
     ctx.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
-
-    ctx.cookies.secure = true // Enables secure cookies when behind HTTP proxy
     return next()
   })
 
@@ -68,30 +47,28 @@ const warmCache = require('./lib/warm-cache')
   router.get('/api', (ctx) => { ctx.body = printStats() })
   app.use(router.routes())
 
-  app.listen(ARDENT_API_LOCAL_PORT)
-  console.log('Web service online')
-
   // Run task to warm up the cache every 15 minutes
-  if (process?.env?.NODE_ENV == 'development') {
-    console.log("Cache warming disabled")
+  if (process?.env?.NODE_ENV === 'development') {
+    console.log('Cache warming disabled')
   } else {
     // Experimented with disabling cache warming after the system upgrade, but
     // it still makes an appreciable difference to request times and keeps
     // request times under 1 second, so leaving it on. It takes a bit under
     // 3 minutes to complete, runnign every 15 minutes seems frequent enough.
-    console.log("Cache warming enabled")
+    console.log('Cache warming enabled')
     cron.schedule('0 */15 * * * *', () => warmCache())
   }
 
+  app.listen(ARDENT_API_LOCAL_PORT)
   console.log(printStats())
-  console.log('Ardent API ready!')
+  console.log('Ardent API service started!')
 })()
 
 process.on('exit', () => console.log('Shutting down'))
 
 process.on('uncaughtException', (e) => console.log('Uncaught exception:', e))
 
-function printStats() {
+function printStats () {
   const stats = JSON.parse(fs.readFileSync(path.join(ARDENT_CACHE_DIR, 'database-stats.json')))
 
   try {

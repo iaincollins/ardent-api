@@ -4,11 +4,10 @@ const KoaRouter = require('koa-router')
 const Package = require('../package.json')
 const { ARDENT_API_HOSTNAME, ARDENT_CACHE_DIR, ARDENT_BACKUP_DIR } = require('../lib/consts')
 const routes = {
-  auth: require('./api/auth'),
   commodities: require('./api/commodities'),
   systems: require('./api/systems'),
   markets: require('./api/markets'),
-  search: require('./api/search'),
+  search: require('./api/search')
   // locations: require('./api/locations') // TODO
 }
 const router = new KoaRouter()
@@ -43,13 +42,6 @@ router.get('/api/v1/backup', (ctx, next) => {
   }
 })
 
-// Disabled as causes errors in Google Search Console (despite what docs say)
-// Note: Path is served as '/robots.txt' in production
-// router.get('/api/robots.txt', (ctx, next) => {
-//   ctx.body = `User-agent: *\nDisallow: /`
-// })
-
-routes.auth(router)
 routes.commodities(router)
 routes.systems(router)
 routes.markets(router)
