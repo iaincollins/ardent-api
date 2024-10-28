@@ -3,11 +3,11 @@ const dbAsync = require('../../lib/db/db-async')
 module.exports = (router) => {
   router.get('/api/v1/search/system/name/:systemName', async (ctx, next) => {
     const { systemName } = ctx.params
-    if (systemName.length < 3) {
+    if (systemName.length < 1) {
       ctx.status = 406
       ctx.body = {
         error: 'System name too short',
-        message: 'Searching for a system by name requires at least the first 3 characters of the name'
+        message: 'Searching for a system by name requires at least 1 character'
       }
       return null
     }

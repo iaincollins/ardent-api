@@ -20,6 +20,8 @@ const cron = require('node-cron')
 console.log('Loading libraries …')
 const router = require('./router')
 const warmCache = require('./lib/warm-cache')
+const updateCommodityTicker = require('./lib/cron-tasks/commodity-ticker')
+const updateGalnetNews = require('./lib/cron-tasks/galnet-news')
 
 ;(async () => {
   // Start web service
@@ -58,6 +60,12 @@ const warmCache = require('./lib/warm-cache')
     console.log('Cache warming enabled')
     cron.schedule('0 */15 * * * *', () => warmCache())
   }
+
+  updateCommodityTicker()
+  cron.schedule('0 */5 * * * *', async () => updateCommodityTicker())
+
+  updateGalnetNews()
+  cron.schedule('0 */20 * * * *', async () => updateGalnetNews())
 
   app.listen(ARDENT_API_LOCAL_PORT)
   console.log(printStats())

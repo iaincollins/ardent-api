@@ -2,7 +2,7 @@ const fs = require('fs')
 const path = require('path')
 const { paramAsBoolean, paramAsInt } = require('../../lib/utils/parse-query-params')
 const dbAsync = require('../../lib/db/db-async')
-const { ARDENT_CACHE_DIR, DEFAULT_MAX_RESULTS_AGE } = require('../../lib/consts')
+const { ARDENT_CACHE_DIR, DEFAULT_MAX_RESULTS_AGE, ARDENT_MARKET_TICKER_CACHE } = require('../../lib/consts')
 const NotFoundResponse = require('../../lib/response/not-found')
 const { getISOTimestamp } = require('../../lib/utils/dates')
 
@@ -17,7 +17,7 @@ module.exports = (router) => {
     ctx.body = JSON.parse(fs.readFileSync(COMMODITIES_REPORT)).commodities
   })
 
-  // This is an undocumented and unsupproted route likely to change in future.
+  // deprecated - will be removed in a future update
   router.get('/api/v1-beta/commodities/ticker', async (ctx, next) => {
     const stations = await dbAsync.all(`
     SELECT * FROM stations.stations AS s WHERE
