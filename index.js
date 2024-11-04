@@ -56,7 +56,7 @@ const updateGalnetNews = require('./lib/cron-tasks/galnet-news')
     // Experimented with disabling cache warming after the system upgrade, but
     // it still makes an appreciable difference to request times and keeps
     // request times under 1 second, so leaving it on. It takes a bit under
-    // 3 minutes to complete, runnign every 15 minutes seems frequent enough.
+    // 3 minutes to complete, running every 15 minutes seems frequent enough.
     console.log('Cache warming enabled')
     cron.schedule('0 */15 * * * *', () => warmCache())
   }
