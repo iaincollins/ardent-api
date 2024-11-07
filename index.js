@@ -42,6 +42,7 @@ const updateGalnetNews = require('./lib/cron-tasks/galnet-news')
     ctx.set('Access-Control-Allow-Origin', ctx.request.header.origin)
     ctx.set('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')
     ctx.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+    ctx.set('Vary', 'Origin')
     return next()
   })
 
