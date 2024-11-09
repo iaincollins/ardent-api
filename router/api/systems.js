@@ -188,7 +188,35 @@ module.exports = (router) => {
     const system = await getSystemByName(systemName)
     if (!system) return NotFoundResponse(ctx, 'System not found')
 
-    const commodities = await dbAsync.all('SELECT * FROM trade.commodities WHERE systemName = @systemName COLLATE NOCASE AND commodityName = @commodityName COLLATE NOCASE', { systemName, commodityName })
+    const commodities = await dbAsync.all(`
+      SELECT
+        c.commodityId,
+        c.commodityName,
+        c.marketId,
+        c.stationName,
+        s.stationType,
+        s.distanceToArrival,
+        s.maxLandingPadSize,
+        c.systemName,
+        c.systemX,
+        c.systemY,
+        c.systemZ,
+        c.fleetCarrier,
+        c.buyPrice,
+        c.demand,
+        c.demandBracket,
+        c.meanPrice,
+        c.sellPrice,
+        c.stock,
+        c.stockBracket,
+        c.statusFlags,
+        c.updatedAt
+      FROM trade.commodities c
+        LEFT JOIN stations.stations s ON c.marketId = s.marketId
+      WHERE c.systemName = @systemName
+        AND c.commodityName = @commodityName
+      `, { systemName, commodityName })
+
     ctx.body = commodities
   })
 
