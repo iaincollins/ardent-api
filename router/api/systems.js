@@ -182,7 +182,11 @@ module.exports = (router) => {
   })
 
   router.get('/api/v1/system/name/:systemName/commodity/name/:commodityName', async (ctx, next) => {
-    const { systemName, commodityName } = ctx.params
+    const { 
+      systemName,
+      commodityName,
+      maxDaysAgo = DEFAULT_MAX_RESULTS_AGE
+    } = ctx.params
 
     // Validate system name
     const system = await getSystemByName(systemName)
@@ -215,6 +219,8 @@ module.exports = (router) => {
         LEFT JOIN stations.stations s ON c.marketId = s.marketId
       WHERE c.systemName = @systemName
         AND c.commodityName = @commodityName
+        AND c.updatedAtDay > '${getISOTimestamp(`-${maxDaysAgo}`).split('T')[0]}'
+      ORDER BY c.stationName
       `, { systemName, commodityName })
 
     ctx.body = commodities

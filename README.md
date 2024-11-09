@@ -249,6 +249,10 @@ Get all buy/sell orders for a commodity in a system.
 
 e.g. https://api.ardent-industry.com/v1/system/name/Sol/commodity/name/gold
 
+##### Supported query parameters
+
+* maxDaysAgo (int); default 30
+
 #### Get a list of nearby importers of a commodity
 
 Get a list of nearby places that importing a commodity close to the specified 
