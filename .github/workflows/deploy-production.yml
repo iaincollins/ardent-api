@@ -55,6 +55,6 @@ jobs:
         SCRIPT_AFTER: |
           cd "${{ vars.DEPLOY_DIR }}/${{ env.SERVICE_NAME }}"
           npm install --omit=dev 
-          pm2 restart "${{ env.SERVICE_NAME }}" --cron-restart="55 7 * * *"
+          pm2 restart "${{ env.SERVICE_NAME }}" --cron-restart="15 7 * * *" --log-date-format="YYYY-MM-DD HH:mm Z"
           pm2 save
           echo $RSYNC_STDOUT
