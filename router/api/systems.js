@@ -351,7 +351,7 @@ module.exports = (router) => {
         LEFT JOIN stations.stations s ON c.marketId = s.marketId 
       WHERE c.commodityName = @commodityName COLLATE NOCASE
         AND c.systemName != @systemName
-        AND c.updatedAt > '${getISOTimestamp(`-${maxDaysAgo}`)}'
+        AND c.updatedAtDay > '${getISOTimestamp(`-${maxDaysAgo}`).split('T')[0]}'
         AND distance <= @maxDistance
         ${filters.join(' ')}
       ORDER BY c.sellPrice DESC
@@ -418,7 +418,7 @@ module.exports = (router) => {
         LEFT JOIN stations.stations s ON c.marketId = s.marketId 
       WHERE c.commodityName = @commodityName COLLATE NOCASE
         AND c.systemName != @systemName
-        AND c.updatedAt > '${getISOTimestamp(`-${maxDaysAgo}`)}'
+        AND c.updatedAtDay > '${getISOTimestamp(`-${maxDaysAgo}`).split('T')[0]}'
         AND distance <= @maxDistance
         ${filters.join(' ')}
       ORDER BY c.buyPrice ASC

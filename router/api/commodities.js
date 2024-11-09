@@ -67,7 +67,7 @@ module.exports = (router) => {
     const filters = [
       `AND (c.demand >= ${parseInt(minVolume)} OR c.demand = 0)`, // Zero is infinite demand
       `AND c.sellPrice >= ${parseInt(minPrice)}`,
-      `AND c.updatedAt > '${getISOTimestamp(`-${maxDaysAgo}`)}'`
+      `AND c.updatedAtDay > '${getISOTimestamp(`-${maxDaysAgo}`).split('T')[0]}'`
     ]
 
     if (systemName) {
@@ -138,7 +138,7 @@ module.exports = (router) => {
 
     const filters = [
       `AND c.stock >= ${parseInt(minVolume)}`,
-      `AND c.updatedAt > '${getISOTimestamp(`-${maxDaysAgo}`)}'`
+      `AND c.updatedAtDay > '${getISOTimestamp(`-${maxDaysAgo}`).split('T')[0]}'`
     ]
 
     if (systemName) {
