@@ -47,8 +47,8 @@ although the approximate distance to the main star for each station is
 displayed (when known) it is not taken into account.
 
 * As of API version `3.0.0` the commodity `import` and `export` endpoints
-support a `maxDaysAgo` option that defaults to `90` days. This filters out data 
-older than 90 days from results by default, which makes results more relevant
+support a `maxDaysAgo` option that defaults to `30` days. This filters out data 
+older than 30 days from results by default, which makes results more relevant
 and improves response times. You can still request to include older data by
 explicitly specifying a greater value. Records are updated when newer 
 information is submitted, but older entries never expire.
@@ -143,7 +143,7 @@ e.g. https://api.ardent-industry.com/v1/commodity/name/gold/imports
 * minVolume (int); default 1
 * minPrice (int); default 1
 * fleetCarriers (bool); default null
-* maxDaysAgo (int); default 90
+* maxDaysAgo (int); default 30
 
 #### Get exporters for a commodity
 
@@ -159,7 +159,7 @@ e.g. https://api.ardent-industry.com/v1/commodity/name/gold/exports
  * minVolume (int); default 1
  * maxPrice (int); default null
  * fleetCarriers (bool); default null
- * maxDaysAgo (int); default 90
+ * maxDaysAgo (int); default 30
 
 #### Get trade reports for a commodity
 
@@ -223,6 +223,7 @@ e.g. https://api.ardent-industry.com/v1/system/name/Sol/commodities/imports
 * minVolume (int); default 1
 * minPrice (int); default 1
 * fleetCarriers (bool); default null
+* maxDaysAgo (int); default 30
 
 #### Get commodities exported by a system
 
@@ -238,6 +239,7 @@ e.g. https://api.ardent-industry.com/v1/system/name/Sol/commodities/exports
 * minVolume (int); default 1
 * maxPrice (int); default null
 * fleetCarriers (bool); default null
+* maxDaysAgo (int); default 30
 
 #### Get trade data for a commodity in a system
 
@@ -263,7 +265,7 @@ e.g. https://api.ardent-industry.com/v1/system/name/Sol/commodity/name/gold/near
 * minPrice (int); default 1
 * fleetCarriers (bool); default null
 * maxDistance (int); default 100, max 500
-* maxDaysAgo (int); default 90
+* maxDaysAgo (int); default 30
 
 #### Get a list of nearby exporters of a commodity
 
@@ -281,7 +283,7 @@ e.g. https://api.ardent-industry.com/v1/system/name/Sol/commodity/name/gold/near
 * maxPrice (int); default null
 * fleetCarriers (bool); default null
 * maxDistance (int); default 100, max 500
-* maxDaysAgo (int); default 90
+* maxDaysAgo (int); default 30
 
 #### Get trade data for a commodity in a specific market
 

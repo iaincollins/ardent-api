@@ -225,7 +225,8 @@ module.exports = (router) => {
     const {
       minVolume = 1,
       minPrice = 1,
-      fleetCarriers = null
+      fleetCarriers = null,
+      maxDaysAgo = DEFAULT_MAX_RESULTS_AGE
     } = ctx.query
 
     // Validate system name
@@ -234,7 +235,8 @@ module.exports = (router) => {
 
     const filters = [
       `AND (c.demand >= ${parseInt(minVolume)} OR c.demand = 0)`, // Zero is infinite demand
-      `AND c.sellPrice >= ${parseInt(minPrice)}`
+      `AND c.sellPrice >= ${parseInt(minPrice)}`,
+      `AND c.updatedAtDay > '${getISOTimestamp(`-${maxDaysAgo}`).split('T')[0]}'`
     ]
 
     if (paramAsBoolean(fleetCarriers) !== null) {
@@ -279,7 +281,8 @@ module.exports = (router) => {
     const {
       minVolume = 1,
       maxPrice = null,
-      fleetCarriers = null
+      fleetCarriers = null,
+      maxDaysAgo = DEFAULT_MAX_RESULTS_AGE
     } = ctx.query
 
     // Validate system name
@@ -287,7 +290,8 @@ module.exports = (router) => {
     if (!system) return NotFoundResponse(ctx, 'System not found')
 
     const filters = [
-      `AND c.stock >= ${parseInt(minVolume)}`
+      `AND c.stock >= ${parseInt(minVolume)}`,
+      `AND c.updatedAtDay > '${getISOTimestamp(`-${maxDaysAgo}`).split('T')[0]}'`
     ]
 
     if (maxPrice !== null) { filters.push(`AND c.buyPrice <= ${parseInt(maxPrice)}`) }
