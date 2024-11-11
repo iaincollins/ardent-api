@@ -1,6 +1,6 @@
 {
   "name": "ardent-api",
-  "version": "4.9.0",
+  "version": "4.10.0",
   "description": "Ardent API provides access to data submitted to EDDN",
   "main": "index.js",
   "scripts": {
@@ -25,6 +25,7 @@
     "dotenv": "^16.0.3",
     "koa": "^2.14.2",
     "koa-bodyparser": "^4.4.0",
+    "koa-compress": "^5.1.1",
     "koa-router": "^12.0.0",
     "node-cron": "^3.0.3"
   },

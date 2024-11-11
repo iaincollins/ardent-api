@@ -13,9 +13,11 @@ console.log('Loading dependancies …')
 const process = require('process')
 const path = require('path')
 const fs = require('fs')
+const cron = require('node-cron')
+const { Z_SYNC_FLUSH } = require('zlib').constants
 const Koa = require('koa')
 const koaBodyParser = require('koa-bodyparser')
-const cron = require('node-cron')
+const koaCompress = require('koa-compress')
 
 console.log('Loading libraries …')
 const router = require('./router')
@@ -45,6 +47,16 @@ const updateGalnetNews = require('./lib/cron-tasks/galnet-news')
     ctx.set('Vary', 'Origin')
     return next()
   })
+
+  // Enable content compression
+  app.use(koaCompress({
+    filter: (content_type) => {
+       return /text/i.test(content_type)
+    },
+    threshold: 2048,
+    flush: Z_SYNC_FLUSH,
+    deflate: Z_SYNC_FLUSH
+ }))
 
   router.get('/', (ctx) => { ctx.body = printStats() })
   router.get('/api', (ctx) => { ctx.body = printStats() })
