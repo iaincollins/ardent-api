@@ -49,14 +49,7 @@ const updateGalnetNews = require('./lib/cron-tasks/galnet-news')
   })
 
   // Enable content compression
-  app.use(koaCompress({
-    filter: (content_type) => {
-       return /text/i.test(content_type)
-    },
-    threshold: 2048,
-    flush: Z_SYNC_FLUSH,
-    deflate: Z_SYNC_FLUSH
- }))
+  app.use(koaCompress())
 
   router.get('/', (ctx) => { ctx.body = printStats() })
   router.get('/api', (ctx) => { ctx.body = printStats() })
