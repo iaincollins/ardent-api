@@ -1,6 +1,6 @@
 {
   "name": "ardent-api",
-  "version": "4.10.1",
+  "version": "4.11.0",
   "description": "Ardent API provides access to data submitted to EDDN",
   "main": "index.js",
   "scripts": {
@@ -21,6 +21,7 @@
   "homepage": "https://github.com/iaincollins/ardent-api#readme",
   "dependencies": {
     "better-sqlite3": "^8.3.0",
+    "command-exists": "^1.2.9",
     "cross-env": "^7.0.3",
     "dotenv": "^16.0.3",
     "koa": "^2.14.2",

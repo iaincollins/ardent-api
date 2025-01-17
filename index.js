@@ -55,18 +55,6 @@ const updateGalnetNews = require('./lib/cron-tasks/galnet-news')
   router.get('/api', (ctx) => { ctx.body = printStats() })
   app.use(router.routes())
 
-  // Run task to warm up the cache every 15 minutes
-  if (process?.env?.NODE_ENV === 'development') {
-    console.log('Cache warming disabled')
-  } else {
-    // Experimented with disabling cache warming after the system upgrade, but
-    // it still makes an appreciable difference to request times and keeps
-    // request times under 1 second, so leaving it on. It takes a bit under
-    // 3 minutes to complete, running every 15 minutes seems frequent enough.
-    console.log('Cache warming enabled')
-    cron.schedule('0 */15 * * * *', () => warmCache())
-  }
-
   updateCommodityTicker()
   cron.schedule('0 */5 * * * *', async () => updateCommodityTicker())
 
@@ -75,6 +63,17 @@ const updateGalnetNews = require('./lib/cron-tasks/galnet-news')
 
   app.listen(ARDENT_API_LOCAL_PORT)
   console.log(printStats())
+
+  // Schedule task to try to keep the cache warm
+  if (process?.env?.NODE_ENV === 'development') {
+    console.log('Cache warming disabled')
+  } else {
+    // Ensure this happens at startup without forcing the server to wait for it
+    console.log('Cache warming enabled')
+    cron.schedule('0 */5 * * * *', () => warmCache())
+    warmCache()
+  }
+
   console.log('Ardent API service started!')
 })()
 
