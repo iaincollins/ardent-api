@@ -351,8 +351,10 @@ module.exports = (router) => {
     if (maxDistance > MAX_NEARBY_SYSTEMS_DISTANCE) { maxDistance = MAX_NEARBY_SYSTEMS_DISTANCE }
     maxDistance = parseInt(maxDistance)
 
-    const { systemAddress, systemX, systemY, systemZ } = await getSystemByName(systemName)
-    if (!systemAddress) return NotFoundResponse(ctx, 'System not found')
+    // Validate system name
+    const system = await getSystemByName(systemName)
+    if (!system) return NotFoundResponse(ctx, 'System not found')
+    const { systemX, systemY, systemZ } = system
 
     const filters = [
       `AND (c.demand >= ${parseInt(minVolume)} OR c.demand = 0)`, // Zero is infinite demand
@@ -417,8 +419,10 @@ module.exports = (router) => {
     if (maxDistance > MAX_NEARBY_SYSTEMS_DISTANCE) { maxDistance = MAX_NEARBY_SYSTEMS_DISTANCE }
     maxDistance = parseInt(maxDistance)
 
-    const { systemAddress, systemX, systemY, systemZ } = await getSystemByName(systemName)
-    if (!systemAddress) return NotFoundResponse(ctx, 'System not found')
+    // Validate system name
+    const system = await getSystemByName(systemName)
+    if (!system) return NotFoundResponse(ctx, 'System not found')
+    const { systemX, systemY, systemZ } = system
 
     const filters = [
       `AND c.stock >= ${parseInt(minVolume)}`

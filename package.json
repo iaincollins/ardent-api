@@ -1,12 +1,12 @@
 {
   "name": "ardent-api",
-  "version": "4.11.2",
+  "version": "4.12.0",
   "description": "Ardent API provides access to data submitted to EDDN",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "warm-cache": "node scripts/warm-cache.js",
     "crawler": "node scripts/crawler.js",
+    "crawler:dev": "cross-env NODE_ENV=development node scripts/crawler.js",
     "dev": "cross-env NODE_ENV=development node index.js",
     "lint": "npx standard --fix"
   },
@@ -22,7 +22,6 @@
   "homepage": "https://github.com/iaincollins/ardent-api#readme",
   "dependencies": {
     "better-sqlite3": "^8.3.0",
-    "command-exists": "^1.2.9",
     "cross-env": "^7.0.3",
     "dotenv": "^16.0.3",
     "koa": "^2.14.2",
