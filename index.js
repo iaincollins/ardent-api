@@ -68,10 +68,16 @@ const updateGalnetNews = require('./lib/cron-tasks/galnet-news')
   if (process?.env?.NODE_ENV === 'development') {
     console.log('Cache warming disabled')
   } else {
-    // Ensure this happens at startup without forcing the server to wait for it
     console.log('Cache warming enabled')
-    cron.schedule('0 */5 * * * *', () => warmCache())
+    // Ensure this happens at startup without forcing the server to wait for it
     warmCache()
+    // Schedule cache warming to re-run every couple of minutes. This results in
+    // performance very similar to a pure RAM disk most of the time (because
+    // the data _is_ in RAM) but withotu the complexity of having to deal with
+    // actually syncing an in-memory database to disk, because the OS will
+    // handle it. A physical disk parition for this data in a RAID 1 array with
+    // a RAM drive would be ideal, but this is lower effort on my part.
+    cron.schedule('0 */2 * * * *', () => warmCache())
   }
 
   console.log('Ardent API service started!')
