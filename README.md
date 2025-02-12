@@ -18,12 +18,9 @@ The Ardent API provides access to data submitted to the Elite Dangerous Data
 Network and is stored by the 
 [Ardent Collector](https://github.com/iaincollins/ardent-collector/).
 
-The API provides access to information for over 100,000,000 star systems and
+The API provide an interface to look up locaiton data for 100,000,000 star systems and
 tracks millions of buy and sell orders for trade commodities sold in stations,
-ports and on carriers throughout the galaxy.
-
-The Ardent API provides access to the data and automatically generated trade
-reports via a REST API via a global Content Distribution Network.
+ports and on fleet carriers throughout the known galaxy.
 
 ## REST API
 
@@ -39,7 +36,7 @@ fleet carriers. If not specified, or set to any other value, the response will
 include results for all stations (including from, but not limited to, fleet 
 carriers).
 
-* The `maxDistance` option is light years (`ly`) and is used to filter results 
+* The `maxDistance` option is light-years (`ly`) and is used to filter results 
 from other systems based on the distance of that systems main star from the 
 main star of the system the result is relative to. You cannot specify a 
 fractional value in light seconds (`ls`) to filter results within a system; 
@@ -82,26 +79,14 @@ Get statistics for the current databases (updated every 15 minutes).
     Trade updates in last 30 days: 7,234,476
 ```
 
-### Get trade reports
-
-Trade reports have analysis and details about bulk commodities being traded in
-systems in and around the Core Systems (aka The Bubble) and near Colonia.
-
-The 'Core Systems 1000' and the 'Colonia Systems 1000' reports intentionally 
-exclude market data from Fleet Carriers to avoid skewing the summaries with 
-volitile data. The reports only include trade orders where supply or demand 
-for a given commodity is at least 1000T.
-
-* https://api.ardent-industry.com/v1/commodities/core-systems-1000
-* https://api.ardent-industry.com/v1/commodities/colonia-systems-1000
-
 ### Get commodities reports
 
 The Commodities report includes all known traded commodities, their price
 ranges (min/max/avg) and the total supply and demand for each commodity.
 
-The commodity report intentionally excludes market data from Fleet Carriers to 
-avoid skewing reports with unreliable data.
+The commodity report excludes market data from Fleet Carriers.
+
+It is updated daily.
 
 * https://api.ardent-industry.com/v1/commodities
 
@@ -131,7 +116,7 @@ e.g. https://api.ardent-industry.com/v1/commodity/name/gold
 
 #### Get importers for a commodity
 
-Get a list of places importing a commodity - places you can sell you - ordered 
+Get a list of places importing a commodity - places you can sell to - ordered 
 by the highest price they are willing to pay. Returns best 100 matching results.
 
 * https://api.ardent-industry.com/v1/commodity/name/{commodityName}/imports
@@ -160,24 +145,6 @@ e.g. https://api.ardent-industry.com/v1/commodity/name/gold/exports
  * maxPrice (int); default null
  * fleetCarriers (bool); default null
  * maxDaysAgo (int); default 30
-
-#### Get trade reports for a commodity
-
-Ardent Trade Reports for a commodity are updated daily and list recommended
-places to buy and sell commodities from, based on price, supply and location.
-
-The 'Core Systems 1000' and the 'Colonia Systems 1000' reports intentionally 
-exclude market data from Fleet Carriers to avoid skewing the summaries with 
-volitile data. The reports only include trade orders where supply or demand 
-for a given commodity is at least 1000T.
-
-* https://api.ardent-industry.com/v1/commodity/name/{commodityName}/core-systems-1000
-* https://api.ardent-industry.com/v1/commodity/name/{commodityName}/colonia-systems-1000
-
-e.g. 
-
-* https://api.ardent-industry.com/v1/commodity/name/gold/core-systems-1000
-* https://api.ardent-industry.com/v1/commodity/name/gold/colonia-systems-1000
 
 ### System information
 
