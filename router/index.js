@@ -29,12 +29,16 @@ router.get('/api/v1/stats/stations/types', async (ctx, next) => {
       GROUP By stationType
       ORDER BY stationType
     `)
-  const response = {}
+  const result = {
+    stationTypes: {},
+    total: 0,
+    timestamp: new Date().toISOString()
+  }
   stationTypes.map(obj => {
-    response[obj.stationType] = obj.count
+    result.stationTypes[obj.stationType] = obj.count
+    result.total += obj.count
   })
-  response.timestamp = new Date().toISOString()
-  ctx.body = response
+  ctx.body = result
 })
 
 router.get('/api/v1/backup', (ctx, next) => {
