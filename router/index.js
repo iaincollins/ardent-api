@@ -11,6 +11,7 @@ const routes = {
   search: require('./api/search')
 }
 const router = new KoaRouter()
+const dbAsync = require('../lib/db/db-async')
 
 router.get('/api/v1', (ctx, next) => ctx.redirect(`https://${ARDENT_API_HOSTNAME}/v1/stats`))
 
@@ -20,6 +21,20 @@ router.get('/api/v1/version', (ctx, next) => {
 
 router.get('/api/v1/stats', (ctx, next) => {
   ctx.body = JSON.parse(fs.readFileSync(path.join(ARDENT_CACHE_DIR, 'database-stats.json')))
+})
+
+router.get('/api/v1/stats/stations/types', async (ctx, next) => {
+  const stationTypes = await dbAsync.all(`
+      SELECT stationType, COUNT(*) as count FROM stations
+      GROUP By stationType
+      ORDER BY stationType
+    `)
+  const response = {}
+  stationTypes.map(obj => {
+    response[obj.stationType] = obj.count
+  })
+  response.timestamp = new Date().toISOString()
+  ctx.body = response
 })
 
 router.get('/api/v1/backup', (ctx, next) => {

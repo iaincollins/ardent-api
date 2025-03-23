@@ -47,11 +47,18 @@ module.exports = (router) => {
     const system = await getSystemByName(systemName)
     if (!system) return NotFoundResponse(ctx, 'System not found')
 
-    const stations = await dbAsync.all(
-      'SELECT * FROM stations.stations WHERE systemName = @systemName COLLATE NOCASE' +
-      ' AND (stationType = \'Planetary Port\' OR stationType = \'Orbis Starport\' OR stationType = \'Coriolis Starport\' OR stationType = \'Ocellus Starport\' OR stationType = \'Asteroid Base\')' +
-      ' ORDER BY stationName',
-      { systemName })
+    const stations = await dbAsync.all(`
+      SELECT * FROM stations.stations WHERE systemName = @systemName COLLATE NOCASE
+        AND (
+            stationType = 'AsteroidBase' OR
+            stationType = 'Coriolis' OR 
+            stationType = 'CraterPort' OR 
+            stationType = 'Ocellus' OR 
+            stationType = 'Orbis' OR
+            stationType = 'SurfaceStation'
+          )
+        ORDER BY stationName
+      `, { systemName })
     ctx.body = stations
   })
 
@@ -62,11 +69,11 @@ module.exports = (router) => {
     const system = await getSystemByName(systemName)
     if (!system) return NotFoundResponse(ctx, 'System not found')
 
-    const stations = await dbAsync.all(
-      'SELECT * FROM stations.stations WHERE systemName = @systemName COLLATE NOCASE' +
-      ' AND (stationType = \'Outpost\' OR stationType = \'Planetary Outpost\')' +
-      ' ORDER BY stationName',
-      { systemName })
+    const stations = await dbAsync.all(`
+      SELECT * FROM stations.stations WHERE systemName = @systemName COLLATE NOCASE
+        AND (stationType = 'Outpost' OR stationType = 'CraterOutpost')
+        ORDER BY stationName
+      `,{ systemName })
     ctx.body = stations
   })
 
@@ -77,11 +84,11 @@ module.exports = (router) => {
     const system = await getSystemByName(systemName)
     if (!system) return NotFoundResponse(ctx, 'System not found')
 
-    const stations = await dbAsync.all(
-      'SELECT * FROM stations.stations WHERE systemName = @systemName COLLATE NOCASE' +
-      ' AND stationType = \'Odyssey Settlement\'' +
-      ' ORDER BY stationName',
-      { systemName })
+    const stations = await dbAsync.all(`
+      SELECT * FROM stations.stations WHERE systemName = @systemName COLLATE NOCASE
+        AND (stationType = 'OnFootSettlement')
+        ORDER BY stationName
+      `,{ systemName })
     ctx.body = stations
   })
 
@@ -92,11 +99,11 @@ module.exports = (router) => {
     const system = await getSystemByName(systemName)
     if (!system) return NotFoundResponse(ctx, 'System not found')
 
-    const stations = await dbAsync.all(
-      'SELECT * FROM stations.stations WHERE systemName = @systemName COLLATE NOCASE' +
-     ' AND stationType = \'Mega ship\'' +
-     ' ORDER BY stationName',
-      { systemName })
+    const stations = await dbAsync.all(`
+    SELECT * FROM stations.stations WHERE systemName = @systemName COLLATE NOCASE
+      AND (stationType = 'MegaShip')
+      ORDER BY stationName
+    `,{ systemName })
     ctx.body = stations
   })
 
@@ -107,11 +114,11 @@ module.exports = (router) => {
     const system = await getSystemByName(systemName)
     if (!system) return NotFoundResponse(ctx, 'System not found')
 
-    const stations = await dbAsync.all(
-      'SELECT * FROM stations.stations WHERE systemName = @systemName COLLATE NOCASE' +
-      ' AND stationType = \'Fleet Carrier\'' +
-      ' ORDER BY stationName',
-      { systemName })
+    const stations = await dbAsync.all(`
+      SELECT * FROM stations.stations WHERE systemName = @systemName COLLATE NOCASE
+        AND (stationType = 'FleetCarrier')
+        ORDER BY stationName
+      `,{ systemName })
     ctx.body = stations
   })
 
