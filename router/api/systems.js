@@ -46,6 +46,7 @@ module.exports = (router) => {
           stationType = 'FleetCarrier' OR
           stationType = 'Megaship' OR
           stationType = 'Ocellus' OR 
+          stationType = 'OnFootSettlement' OR
           stationType = 'Orbis' OR
           stationType = 'Outpost' OR
           stationType = 'PlanetaryConstructionDepot' OR
@@ -132,7 +133,7 @@ module.exports = (router) => {
 
     const stations = await dbAsync.all(`
       SELECT * FROM stations.stations WHERE systemName = @systemName COLLATE NOCASE
-        AND (stationType = 'FleetCarrier')
+        AND (stationType = 'FleetCarrier' OR stationType = 'StrongholdCarrier')
         ORDER BY stationName
       `,{ systemName })
     ctx.body = stations
@@ -141,7 +142,7 @@ module.exports = (router) => {
   router.get('/api/v1/carrier/ident/:carrierIdent', async (ctx, next) => {
     const { carrierIdent } = ctx.params
 
-    const carrier = await dbAsync.get('SELECT * FROM stations.stations WHERE stationType = \'Fleet Carrier\' AND stationName = @carrierIdent', { carrierIdent })
+    const carrier = await dbAsync.get(`SELECT * FROM stations.stations WHERE stationType = 'FleetCarrier' AND stationName = @carrierIdent`, { carrierIdent })
     if (!carrier) return NotFoundResponse(ctx, 'Carrier not found')
     ctx.body = carrier
   })
