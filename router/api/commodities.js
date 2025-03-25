@@ -7,8 +7,6 @@ const NotFoundResponse = require('../../lib/response/not-found')
 const { getISOTimestamp } = require('../../lib/utils/dates')
 
 const COMMODITIES_REPORT = path.join(ARDENT_CACHE_DIR, 'commodities.json')
-const CORE_SYSTEMS_1000_REPORT = path.join(ARDENT_CACHE_DIR, 'core-systems-1000.json')
-const COLONIA_SYSTEMS_1000_REPORT = path.join(ARDENT_CACHE_DIR, 'colonia-systems-1000.json')
 const MAX_COMMODITY_SORTED_RESULTS = 100
 const MAX_COMMODITY_SEARCH_DISTANCE = 1000
 
@@ -17,34 +15,10 @@ module.exports = (router) => {
     ctx.body = JSON.parse(fs.readFileSync(COMMODITIES_REPORT)).commodities
   })
 
-  router.get('/api/v1/commodities/core-systems-1000', async (ctx, next) => {
-    ctx.body = JSON.parse(fs.readFileSync(CORE_SYSTEMS_1000_REPORT))
-  })
-
-  router.get('/api/v1/commodities/colonia-systems-1000', async (ctx, next) => {
-    ctx.body = JSON.parse(fs.readFileSync(COLONIA_SYSTEMS_1000_REPORT))
-  })
-
   router.get('/api/v1/commodity/name/:commodityName', async (ctx, next) => {
     let { commodityName } = ctx.params
     commodityName = commodityName.trim().toLowerCase().replace(/[^a-zA-Z0-9]/g, '')
     const pathToFile = path.join(ARDENT_CACHE_DIR, 'commodities', `${commodityName}`, `${commodityName}.json`)
-    if (!fs.existsSync(pathToFile)) return NotFoundResponse(ctx, 'Commodity not found')
-    ctx.body = JSON.parse(fs.readFileSync(pathToFile))
-  })
-
-  router.get('/api/v1/commodity/name/:commodityName/core-systems-1000', async (ctx, next) => {
-    let { commodityName } = ctx.params
-    commodityName = commodityName.trim().toLowerCase().replace(/[^a-zA-Z0-9]/g, '')
-    const pathToFile = path.join(ARDENT_CACHE_DIR, 'commodities', `${commodityName}`, 'core-systems-1000.json')
-    if (!fs.existsSync(pathToFile)) return NotFoundResponse(ctx, 'Commodity not found')
-    ctx.body = JSON.parse(fs.readFileSync(pathToFile))
-  })
-
-  router.get('/api/v1/commodity/name/:commodityName/colonia-systems-1000', async (ctx, next) => {
-    let { commodityName } = ctx.params
-    commodityName = commodityName.trim().toLowerCase().replace(/[^a-zA-Z0-9]/g, '')
-    const pathToFile = path.join(ARDENT_CACHE_DIR, 'commodities', `${commodityName}`, 'colonia-systems-1000.json')
     if (!fs.existsSync(pathToFile)) return NotFoundResponse(ctx, 'Commodity not found')
     ctx.body = JSON.parse(fs.readFileSync(pathToFile))
   })
@@ -95,6 +69,8 @@ module.exports = (router) => {
         s.stationType,
         s.distanceToArrival,
         s.maxLandingPadSize,
+        s.bodyId,
+        s.bodyName,
         c.systemName,
         c.systemX,
         c.systemY,
@@ -168,6 +144,8 @@ module.exports = (router) => {
         s.stationType,
         s.distanceToArrival,
         s.maxLandingPadSize,
+        s.bodyId,
+        s.bodyName,
         c.systemName,
         c.systemX,
         c.systemY,
