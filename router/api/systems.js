@@ -36,7 +36,9 @@ module.exports = (router) => {
     const system = await getSystemByName(systemName)
     if (!system) return NotFoundResponse(ctx, 'System not found')
 
-    // An explicit list of known dockable station types
+    // An explicit list of all known dockable station types
+    // This is the most liberal interpretation of 'station', but is still
+    // explicit to avoid returning stations where the type is unknown/invalid
     const stations = await dbAsync.all(`
       SELECT * FROM stations.stations WHERE systemName = @systemName COLLATE NOCASE
       AND (
@@ -44,7 +46,7 @@ module.exports = (router) => {
           stationType = 'Coriolis' OR 
           stationType = 'CraterPort' OR 
           stationType = 'FleetCarrier' OR
-          stationType = 'Megaship' OR
+          stationType = 'MegaShip' OR
           stationType = 'Ocellus' OR 
           stationType = 'OnFootSettlement' OR
           stationType = 'Orbis' OR
@@ -118,7 +120,7 @@ module.exports = (router) => {
 
     const stations = await dbAsync.all(`
     SELECT * FROM stations.stations WHERE systemName = @systemName COLLATE NOCASE
-      AND (stationType = 'Megaship')
+      AND (stationType = 'MegaShip')
       ORDER BY stationName
     `,{ systemName })
     ctx.body = stations
@@ -404,6 +406,8 @@ module.exports = (router) => {
         s.stationType,
         s.distanceToArrival,
         s.maxLandingPadSize,
+        s.bodyId,
+        s.bodyName,
         c.systemName,
         c.systemX,
         c.systemY,
@@ -473,6 +477,8 @@ module.exports = (router) => {
         s.stationType,
         s.distanceToArrival,
         s.maxLandingPadSize,
+        s.bodyId,
+        s.bodyName,
         c.systemName,
         c.systemX,
         c.systemY,
