@@ -46,15 +46,15 @@ module.exports = (router) => {
           stationType = 'AsteroidBase' OR
           stationType = 'Coriolis' OR 
           stationType = 'CraterPort' OR 
+          stationType = 'CraterOutpost' OR 
           stationType = 'FleetCarrier' OR
           stationType = 'MegaShip' OR
           stationType = 'Ocellus' OR 
           stationType = 'OnFootSettlement' OR
           stationType = 'Orbis' OR
           stationType = 'Outpost' OR
-          stationType = 'PlanetaryConstructionDepot' OR
           stationType = 'StrongholdCarrier' OR
-          stationType = 'SpaceConstructionDepot'
+          stationType = 'SurfaceStation'
         )
       ORDER BY stationName
     `, { systemName })
