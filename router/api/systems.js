@@ -2,7 +2,7 @@ const dbAsync = require('../../lib/db/db-async')
 const { getNearbySystemSectors } = require('../../lib/system-sectors')
 const { paramAsBoolean, paramAsInt } = require('../../lib/utils/parse-query-params')
 const NotFoundResponse = require('../../lib/response/not-found')
-const { getISOTimestamp } = require('../../lib/utils/dates')
+const { getISODate } = require('../../lib/utils/dates')
 const { DEFAULT_MAX_RESULTS_AGE } = require('../../lib/consts')
 
 const DEFAULT_NEARBY_SYSTEMS_DISTANCE = 100
@@ -213,8 +213,10 @@ module.exports = (router) => {
     const { 
       systemName,
       commodityName,
-      maxDaysAgo = DEFAULT_MAX_RESULTS_AGE
     } = ctx.params
+    const {
+      maxDaysAgo = DEFAULT_MAX_RESULTS_AGE
+    } = ctx.query
 
     // Validate system name
     const system = await getSystemByName(systemName)
@@ -249,10 +251,9 @@ module.exports = (router) => {
         LEFT JOIN stations.stations s ON c.marketId = s.marketId
       WHERE c.systemName = @systemName
         AND c.commodityName = @commodityName
-        AND c.updatedAtDay > '${getISOTimestamp(`-${maxDaysAgo}`).split('T')[0]}'
+        AND c.updatedAtDay > '${getISODate(`-${maxDaysAgo}`)}'
       ORDER BY c.stationName
       `, { systemName, commodityName })
-
     ctx.body = commodities
   })
 
@@ -272,7 +273,7 @@ module.exports = (router) => {
     const filters = [
       `AND (c.demand >= ${parseInt(minVolume)} OR c.demand = 0)`, // Zero is infinite demand
       `AND c.sellPrice >= ${parseInt(minPrice)}`,
-      `AND c.updatedAtDay > '${getISOTimestamp(`-${maxDaysAgo}`).split('T')[0]}'`
+      `AND c.updatedAtDay > '${getISODate(`-${maxDaysAgo}`)}'`
     ]
 
     if (paramAsBoolean(fleetCarriers) !== null) {
@@ -329,7 +330,7 @@ module.exports = (router) => {
 
     const filters = [
       `AND c.stock >= ${parseInt(minVolume)}`,
-      `AND c.updatedAtDay > '${getISOTimestamp(`-${maxDaysAgo}`).split('T')[0]}'`
+      `AND c.updatedAtDay > '${getISODate(`-${maxDaysAgo}`)}'`
     ]
 
     if (maxPrice !== null) { filters.push(`AND c.buyPrice <= ${parseInt(maxPrice)}`) }
@@ -427,7 +428,7 @@ module.exports = (router) => {
         LEFT JOIN stations.stations s ON c.marketId = s.marketId 
       WHERE c.commodityName = @commodityName COLLATE NOCASE
         AND c.systemName != @systemName
-        AND c.updatedAtDay > '${getISOTimestamp(`-${maxDaysAgo}`).split('T')[0]}'
+        AND c.updatedAtDay > '${getISODate(`-${maxDaysAgo}`)}'
         AND distance <= @maxDistance
         ${filters.join(' ')}
       ORDER BY c.sellPrice DESC
@@ -498,7 +499,7 @@ module.exports = (router) => {
         LEFT JOIN stations.stations s ON c.marketId = s.marketId 
       WHERE c.commodityName = @commodityName COLLATE NOCASE
         AND c.systemName != @systemName
-        AND c.updatedAtDay > '${getISOTimestamp(`-${maxDaysAgo}`).split('T')[0]}'
+        AND c.updatedAtDay > '${getISODate(`-${maxDaysAgo}`)}'
         AND distance <= @maxDistance
         ${filters.join(' ')}
       ORDER BY c.buyPrice ASC

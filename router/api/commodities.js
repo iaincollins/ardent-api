@@ -4,7 +4,7 @@ const { paramAsBoolean, paramAsInt } = require('../../lib/utils/parse-query-para
 const dbAsync = require('../../lib/db/db-async')
 const { ARDENT_CACHE_DIR, DEFAULT_MAX_RESULTS_AGE, ARDENT_MARKET_TICKER_CACHE } = require('../../lib/consts')
 const NotFoundResponse = require('../../lib/response/not-found')
-const { getISOTimestamp } = require('../../lib/utils/dates')
+const { getISODate } = require('../../lib/utils/dates')
 
 const COMMODITIES_REPORT = path.join(ARDENT_CACHE_DIR, 'commodities.json')
 const MAX_COMMODITY_SORTED_RESULTS = 100
@@ -41,7 +41,7 @@ module.exports = (router) => {
     const filters = [
       `AND (c.demand >= ${parseInt(minVolume)} OR c.demand = 0)`, // Zero is infinite demand
       `AND c.sellPrice >= ${parseInt(minPrice)}`,
-      `AND c.updatedAtDay > '${getISOTimestamp(`-${maxDaysAgo}`).split('T')[0]}'`
+      `AND c.updatedAtDay > '${getISODate(`-${maxDaysAgo}`)}'`
     ]
 
     if (systemName) {
@@ -114,7 +114,7 @@ module.exports = (router) => {
 
     const filters = [
       `AND c.stock >= ${parseInt(minVolume)}`,
-      `AND c.updatedAtDay > '${getISOTimestamp(`-${maxDaysAgo}`).split('T')[0]}'`
+      `AND c.updatedAtDay > '${getISODate(`-${maxDaysAgo}`)}'`
     ]
 
     if (systemName) {
