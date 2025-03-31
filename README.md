@@ -10,7 +10,7 @@ The internal logic for routes may evolve over time and this may cause the
 content of responses to vary, based on changes to internal filters, how data 
 is processed and changes in retention policies. 
 
-For more information please also see the following repositories:
+Related repositories:
 
 * https://github.com/iaincollins/ardent-www
 * https://github.com/iaincollins/ardent-collector
