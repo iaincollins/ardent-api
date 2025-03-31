@@ -168,6 +168,34 @@ e.g. https://api.ardent-industry.com/v1/system/name/Sol/nearby
 
 * maxDistance (int); default 100, max 500
 
+#### Get nearest station service
+
+Find the nearest station providing a specific type of service and information 
+about the station and system they are in.
+
+The location of 20 nearest matching stations will be returned. Results are 
+returned in order of distance. A minimum landing pad size for the station can 
+be specified.
+
+* https://api.ardent-industry.com/v1/system/name/{systemName}/nearest/{service}
+
+e.g. You can query for any of these services:
+
+* https://api.ardent-industry.com/v1/system/name/Sol/nearest/interstellar-factors
+* https://api.ardent-industry.com/v1/system/name/Sol/nearest/material-trader
+* https://api.ardent-industry.com/v1/system/name/Sol/nearest/technology-broker
+* https://api.ardent-industry.com/v1/system/name/Sol/nearest/black-market
+* https://api.ardent-industry.com/v1/system/name/Sol/nearest/universal-cartographics
+* https://api.ardent-industry.com/v1/system/name/Sol/nearest/refuel
+* https://api.ardent-industry.com/v1/system/name/Sol/nearest/repair
+* https://api.ardent-industry.com/v1/system/name/Sol/nearest/shipyard
+* https://api.ardent-industry.com/v1/system/name/Sol/nearest/outfitting
+* https://api.ardent-industry.com/v1/system/name/Sol/nearest/search-and-rescue
+
+##### Supported query parameters
+
+* minLandingPadSize (int); default 1 (1 = small, 2 = medium, 3 = large)
+
 #### Get commodities traded in a system
 
 Returns a list of all known trade orders in a system.

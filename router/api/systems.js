@@ -9,6 +9,7 @@ const DEFAULT_NEARBY_SYSTEMS_DISTANCE = 100
 const MAX_NEARBY_SYSTEMS_DISTANCE = 500 // Distance in Ly
 const MAX_NEARBY_SYSTEMS_RESULTS = 1000
 const MAX_NEARBY_COMMODITY_RESULTS = 1000
+const MAX_NEARBY_CONTACTS_RESULTS = 20
 
 module.exports = (router) => {
   router.get('/api/v1/system/name/:systemName', async (ctx, next) => {
@@ -528,7 +529,7 @@ module.exports = (router) => {
     if (!systemAddress) return NotFoundResponse(ctx, 'System not found')
 
     const nearbySectors = getNearbySystemSectors(systemX, systemY, systemZ, maxDistance)
-    const nearestSystems = await dbAsync.all(`
+    ctx.body = await dbAsync.all(`
       SELECT
         *,
         ROUND(SQRT(POWER(systemX-@systemX,2)+POWER(systemY-@systemY,2)+POWER(systemZ-@systemZ,2))) AS distance
@@ -544,8 +545,47 @@ module.exports = (router) => {
       systemName,
       maxDistance
     })
+  })
 
-    ctx.body = nearestSystems
+  router.get('/api/v1/system/name/:systemName/nearest/:serviceType', async (ctx, next) => {
+    const { systemName, serviceType } = ctx.params
+    let {
+      minLandingPadSize = 1
+    } = ctx.query
+
+    const serviceTypes = {
+      'interstellar-factors': 'interstellarFactors',
+      'material-trader': 'materialTrader',
+      'technology-broker': 'technologyBroker',
+      'black-market': 'blackMarket',
+      'universal-cartographics': 'universalCartographics',
+      'refuel': 'refuel',
+      'repair': 'repair',
+      'shipyard': 'shipyard',
+      'outfitting': 'outfitting',
+      'search-and-rescue': 'searchAndRescue'
+    }
+    if (!serviceTypes[serviceType]) return NotFoundResponse(ctx, 'Service unknown')
+
+    const system = await getSystemByName(systemName)
+    if (!system) return NotFoundResponse(ctx, 'System not found')
+
+    const { systemX, systemY, systemZ } = system
+
+    ctx.body = await dbAsync.all(`
+      SELECT
+        *,
+        ROUND(SQRT(POWER(systemX-@systemX,2)+POWER(systemY-@systemY,2)+POWER(systemZ-@systemZ,2))) AS distance
+      FROM stations.stations
+        WHERE ${serviceTypes[serviceType]} = 1
+          AND maxLandingPadSize >= ${minLandingPadSize}
+          AND distance IS NOT NULL
+      ORDER BY distance
+        LIMIT ${MAX_NEARBY_CONTACTS_RESULTS}`, {
+      systemX,
+      systemY,
+      systemZ
+    })
   })
 
   async function getSystemByName (systemName) {
