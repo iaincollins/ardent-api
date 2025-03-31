@@ -4,9 +4,13 @@ The Ardent API powers [ardent-industry.com](https://ardent-industry.com)
 
 The API is considered fairly stable and no breaking changes are anticipated,
 but expect evolution of parameters that can be passed and enrichment of
-responses. In some cases the internal logic for routes may evolve over time.
+responses. 
 
-More information about Ardent:
+The internal logic for routes may evolve over time and this may cause the 
+content of responses to vary, based on changes to internal filters, how data 
+is processed and changes in retention policies. 
+
+For more information please also see the following repositories:
 
 * https://github.com/iaincollins/ardent-www
 * https://github.com/iaincollins/ardent-collector
@@ -48,7 +52,7 @@ support a `maxDaysAgo` option that defaults to `30` days. This filters out data
 older than 30 days from results by default, which makes results more relevant
 and improves response times. You can still request to include older data by
 explicitly specifying a greater value. Records are updated when newer 
-information is submitted, but older entries never expire.
+information is submitted.
 
 The endpoints are versioned but there may still be changes in the logic of how 
 requests are handled and exactly what data returned in response to a query as 
