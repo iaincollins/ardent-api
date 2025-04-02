@@ -6,6 +6,7 @@ console.log('Configuring environment …')
 const {
   ARDENT_CACHE_DIR,
   ARDENT_API_DEFAULT_CACHE_CONTROL,
+  ARDENT_API_BASE_URL,
   ARDENT_API_LOCAL_PORT
 } = require('./lib/consts')
 
@@ -63,7 +64,8 @@ const updateGalnetNews = require('./lib/cron-tasks/galnet-news')
   app.listen(ARDENT_API_LOCAL_PORT)
   console.log(printStats())
 
-  console.log('Ardent API service started!')
+  console.log(`Ardent API service started on port ${ARDENT_API_LOCAL_PORT}`)
+  console.log(`URL: ${ARDENT_API_BASE_URL}`)
 })()
 
 process.on('exit', () => console.log('Shutting down'))

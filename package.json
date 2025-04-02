@@ -1,6 +1,6 @@
 {
   "name": "ardent-api",
-  "version": "5.8.0",
+  "version": "5.8.1",
   "description": "Ardent API provides access to data submitted to EDDN",
   "main": "index.js",
   "scripts": {
@@ -8,6 +8,7 @@
     "crawler": "node scripts/crawler.js",
     "crawler:dev": "cross-env NODE_ENV=development node scripts/crawler.js",
     "dev": "cross-env NODE_ENV=development node index.js",
+    "dev:local": "cross-env NODE_ENV=development ARDENT_API_BASE_URL=http://localhost:3001/api node index.js",
     "lint": "npx standard --fix"
   },
   "repository": {
