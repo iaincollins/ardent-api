@@ -525,8 +525,10 @@ module.exports = (router) => {
     if (maxDistance > MAX_NEARBY_SYSTEMS_DISTANCE) { maxDistance = MAX_NEARBY_SYSTEMS_DISTANCE }
     maxDistance = parseInt(maxDistance)
 
-    const { systemAddress, systemX, systemY, systemZ } = await getSystemByName(systemName)
-    if (!systemAddress) return NotFoundResponse(ctx, 'System not found')
+    const system = await getSystemByName(systemName)
+    if (!system) return NotFoundResponse(ctx, 'System not found')
+
+    const { systemX, systemY, systemZ } = system
 
     const nearbySectors = getNearbySystemSectors(systemX, systemY, systemZ, maxDistance)
     ctx.body = await dbAsync.all(`
