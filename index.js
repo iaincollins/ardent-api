@@ -73,27 +73,30 @@ process.on('exit', () => console.log('Shutting down'))
 process.on('uncaughtException', (e) => console.log('Uncaught exception:', e))
 
 function printStats () {
-  const stats = JSON.parse(fs.readFileSync(path.join(ARDENT_CACHE_DIR, 'database-stats.json')))
+  const pathToStats = path.join(ARDENT_CACHE_DIR, 'database-stats.json')
+  const stats = fs.existsSync(pathToStats)
+    ? JSON.parse(fs.readFileSync(pathToStats))
+    : {}
 
   try {
     return `Ardent API v${Package.version} Online\n` +
       '--------------------------\n' +
       ((stats)
         ? 'Locations:\n' +
-        `* Star systems: ${stats.systems.toLocaleString()}\n` +
-        `* Points of interest: ${stats.pointsOfInterest.toLocaleString()}\n` +
+        `* Star systems: ${stats?.systems?.toLocaleString()}\n` +
+        `* Points of interest: ${stats?.pointsOfInterest?.toLocaleString()}\n` +
         'Stations:\n' +
-        `* Stations: ${stats.stations.stations.toLocaleString()}\n` +
-        `* Fleet Carriers: ${stats.stations.carriers.toLocaleString()}\n` +
-        `* Station updates in last 24 hours: ${stats.stations.updatedInLast24Hours.toLocaleString()}\n` +
+        `* Stations: ${stats?.stations?.stations.toLocaleString()}\n` +
+        `* Fleet Carriers: ${stats?.stations?.carriers.toLocaleString()}\n` +
+        `* Station updates in last 24 hours: ${stats?.stations?.updatedInLast24Hours?.toLocaleString()}\n` +
         'Trade:\n' +
-        `* Station Markets: ${stats.trade.stations.toLocaleString()}\n` +
-        `* Fleet Carrier Markets: ${stats.trade.carriers.toLocaleString()}\n` +
-        `* Trade systems: ${stats.trade.systems.toLocaleString()}\n` +
-        `* Trade orders: ${stats.trade.tradeOrders.toLocaleString()}\n` +
-        `* Trade updates in last 24 hours: ${stats.trade.updatedInLast24Hours.toLocaleString()}\n` +
-        `* Unique commodities: ${stats.trade.uniqueCommodities.toLocaleString()}\n` +
-        `Stats last updated: ${stats.timestamp}`
+        `* Station Markets: ${stats?.trade?.stations?.toLocaleString()}\n` +
+        `* Fleet Carrier Markets: ${stats?.trade?.carriers?.toLocaleString()}\n` +
+        `* Trade systems: ${stats?.trade?.systems?.toLocaleString()}\n` +
+        `* Trade orders: ${stats?.trade?.tradeOrders?.toLocaleString()}\n` +
+        `* Trade updates in last 24 hours: ${stats?.trade?.updatedInLast24Hours?.toLocaleString()}\n` +
+        `* Unique commodities: ${stats?.trade?.uniqueCommodities?.toLocaleString()}\n` +
+        `Stats last updated: ${stats?.timestamp}`
         : 'Stats not generated yet')
   } catch (e) {
     return 'Error: Could not load stats'
