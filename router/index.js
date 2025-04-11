@@ -27,7 +27,12 @@ router.get('/api/v1/version', (ctx, next) => {
 })
 
 router.get('/api/v1/stats', (ctx, next) => {
-  ctx.body = JSON.parse(fs.readFileSync(path.join(ARDENT_CACHE_DIR, 'database-stats.json')))
+  try {
+    ctx.body = JSON.parse(fs.readFileSync(path.join(ARDENT_CACHE_DIR, 'database-stats.json')))
+  } catch (e) {
+    console.error(e)
+    ctx.body = null
+  }
 })
 
 router.get('/api/v1/stats/stations/types', async (ctx, next) => {

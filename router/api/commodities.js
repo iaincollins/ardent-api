@@ -11,8 +11,13 @@ const MAX_COMMODITY_SORTED_RESULTS = 100
 const MAX_COMMODITY_SEARCH_DISTANCE = 1000
 
 module.exports = (router) => {
-  router.get('/api/v1/commodities', async (ctx, next) => {
-    ctx.body = JSON.parse(fs.readFileSync(COMMODITIES_REPORT)).commodities
+  router.get('/api/v1/commodities', async (ctx, next) => {    
+    try {
+      ctx.body = JSON.parse(fs.readFileSync(COMMODITIES_REPORT)).commodities
+    } catch (e) {
+      console.error(e)
+      ctx.body = null
+    }
   })
 
   router.get('/api/v1/commodity/name/:commodityName', async (ctx, next) => {
