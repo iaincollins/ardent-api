@@ -4,6 +4,7 @@ const { paramAsBoolean, paramAsInt } = require('../../lib/utils/parse-query-para
 const NotFoundResponse = require('../../lib/response/not-found')
 const { getISODate } = require('../../lib/utils/dates')
 const { DEFAULT_MAX_RESULTS_AGE } = require('../../lib/consts')
+const EDSM = require('../../lib/edsm')
 
 const DEFAULT_NEARBY_SYSTEMS_DISTANCE = 100
 const MAX_NEARBY_SYSTEMS_DISTANCE = 500 // Distance in Ly
@@ -17,6 +18,24 @@ module.exports = (router) => {
     const system = await getSystemByName(systemName)
     if (!system) return NotFoundResponse(ctx, 'System not found')
     ctx.body = system
+  })
+
+  // This function is currently mostly a pass through to the EDSM API
+  router.get('/api/v1/system/name/:systemName/status', async (ctx, next) => {
+    const { systemName } = ctx.params
+    const system = await getSystemByName(systemName)
+    if (!system) return NotFoundResponse(ctx, 'System not found')
+    const systemStatus = await EDSM.getSystemStatus(system.systemName)
+    ctx.body = systemStatus
+  })
+
+  // This function is currently mostly a pass through to the EDSM API
+  router.get('/api/v1/system/name/:systemName/bodies', async (ctx, next) => {
+    const { systemName } = ctx.params
+    const system = await getSystemByName(systemName)
+    if (!system) return NotFoundResponse(ctx, 'System not found')
+    const systemBodies = await EDSM.getSystemBodies(system.systemName)
+    ctx.body = systemBodies
   })
 
   router.get('/api/v1/system/name/:systemName/markets', async (ctx, next) => {
