@@ -4,6 +4,7 @@ const { paramAsBoolean, paramAsInt } = require('../../lib/utils/parse-query-para
 const NotFoundResponse = require('../../lib/response/not-found')
 const { getISODate } = require('../../lib/utils/dates')
 const { DEFAULT_MAX_RESULTS_AGE } = require('../../lib/consts')
+const getSystemByName = require('../../lib/utils/get-system-by-name')
 const EDSM = require('../../lib/edsm')
 
 const DEFAULT_NEARBY_SYSTEMS_DISTANCE = 100
@@ -12,6 +13,10 @@ const MAX_NEARBY_SYSTEMS_RESULTS = 1000
 const MAX_NEARBY_COMMODITY_RESULTS = 1000
 const MAX_NEARBY_CONTACTS_RESULTS = 20
 
+// Note: The .filter(result => result.systemName === system.systemName) that is
+// applied before returning results is to ensure we only return correct data
+// for systems with case sensitive names like 'i_Carinae'/'I Carinae'.
+// That's also why we use the systemAddress (id64) when querying EDSM.
 module.exports = (router) => {
   router.get('/api/v1/system/name/:systemName', async (ctx, next) => {
     const { systemName } = ctx.params
@@ -25,7 +30,7 @@ module.exports = (router) => {
     const { systemName } = ctx.params
     const system = await getSystemByName(systemName)
     if (!system) return NotFoundResponse(ctx, 'System not found')
-    const systemStatus = await EDSM.getSystemStatus(system.systemName)
+    const systemStatus = await EDSM.getSystemStatus(system.systemAddress)
     ctx.body = systemStatus
   })
 
@@ -34,7 +39,7 @@ module.exports = (router) => {
     const { systemName } = ctx.params
     const system = await getSystemByName(systemName)
     if (!system) return NotFoundResponse(ctx, 'System not found')
-    const systemBodies = await EDSM.getSystemBodies(system.systemName)
+    const systemBodies = await EDSM.getSystemBodies(system.systemAddress)
     ctx.body = systemBodies
   })
 
@@ -45,8 +50,9 @@ module.exports = (router) => {
     const system = await getSystemByName(systemName)
     if (!system) return NotFoundResponse(ctx, 'System not found')
 
-    const stations = await dbAsync.all('SELECT marketId, stationName, fleetCarrier, updatedAt FROM trade.commodities WHERE systemName = @systemName COLLATE NOCASE GROUP BY marketId ORDER BY stationName', { systemName })
-    ctx.body = stations
+    const stations = await dbAsync.all('SELECT marketId, stationName, systemName, fleetCarrier, updatedAt FROM trade.commodities WHERE systemName = @systemName GROUP BY marketId ORDER BY stationName', { systemName: system.systemName })
+
+    ctx.body = stations.filter(result => result.systemName === system.systemName)
   })
 
   router.get('/api/v1/system/name/:systemName/stations', async (ctx, next) => {
@@ -60,7 +66,7 @@ module.exports = (router) => {
     // This is the most liberal interpretation of 'station', but is still
     // explicit to avoid returning stations where the type is unknown/invalid
     const stations = await dbAsync.all(`
-      SELECT * FROM stations.stations WHERE systemName = @systemName COLLATE NOCASE
+      SELECT * FROM stations.stations WHERE systemName = @systemName
       AND (
           stationType = 'AsteroidBase' OR
           stationType = 'Coriolis' OR 
@@ -76,8 +82,8 @@ module.exports = (router) => {
           stationType = 'SurfaceStation'
         )
       ORDER BY stationName
-    `, { systemName })
-    ctx.body = stations
+    `, { systemName: system.systemName })
+    ctx.body = stations.filter(result => result.systemName === system.systemName)
   })
 
   router.get('/api/v1/system/name/:systemName/stations/ports', async (ctx, next) => {
@@ -88,7 +94,7 @@ module.exports = (router) => {
     if (!system) return NotFoundResponse(ctx, 'System not found')
 
     const stations = await dbAsync.all(`
-      SELECT * FROM stations.stations WHERE systemName = @systemName COLLATE NOCASE
+      SELECT * FROM stations.stations WHERE systemName = @systemName
         AND (
             stationType = 'AsteroidBase' OR
             stationType = 'Coriolis' OR 
@@ -97,8 +103,9 @@ module.exports = (router) => {
             stationType = 'Orbis'
           )
         ORDER BY stationName
-      `, { systemName })
-    ctx.body = stations
+      `, { systemName: system.systemName })
+
+    ctx.body = stations.filter(result => result.systemName === system.systemName)
   })
 
   router.get('/api/v1/system/name/:systemName/stations/outposts', async (ctx, next) => {
@@ -109,11 +116,12 @@ module.exports = (router) => {
     if (!system) return NotFoundResponse(ctx, 'System not found')
 
     const stations = await dbAsync.all(`
-      SELECT * FROM stations.stations WHERE systemName = @systemName COLLATE NOCASE
+      SELECT * FROM stations.stations WHERE systemName = @systemName
         AND (stationType = 'Outpost' OR stationType = 'CraterOutpost')
         ORDER BY stationName
-      `,{ systemName })
-    ctx.body = stations
+      `, { systemName: system.systemName })
+
+    ctx.body = stations.filter(result => result.systemName === system.systemName)
   })
 
   router.get('/api/v1/system/name/:systemName/stations/settlements', async (ctx, next) => {
@@ -124,11 +132,12 @@ module.exports = (router) => {
     if (!system) return NotFoundResponse(ctx, 'System not found')
 
     const stations = await dbAsync.all(`
-      SELECT * FROM stations.stations WHERE systemName = @systemName COLLATE NOCASE
+      SELECT * FROM stations.stations WHERE systemName = @systemName
         AND (stationType = 'OnFootSettlement')
         ORDER BY stationName
-      `,{ systemName })
-    ctx.body = stations
+      `, { systemName: system.systemName })
+
+    ctx.body = stations.filter(result => result.systemName === system.systemName)
   })
 
   router.get('/api/v1/system/name/:systemName/stations/megaships', async (ctx, next) => {
@@ -139,11 +148,12 @@ module.exports = (router) => {
     if (!system) return NotFoundResponse(ctx, 'System not found')
 
     const stations = await dbAsync.all(`
-    SELECT * FROM stations.stations WHERE systemName = @systemName COLLATE NOCASE
+    SELECT * FROM stations.stations WHERE systemName = @systemName
       AND (stationType = 'MegaShip')
       ORDER BY stationName
-    `,{ systemName })
-    ctx.body = stations
+    `, { systemName: system.systemName })
+
+    ctx.body = stations.filter(result => result.systemName === system.systemName)
   })
 
   router.get('/api/v1/system/name/:systemName/stations/carriers', async (ctx, next) => {
@@ -154,18 +164,20 @@ module.exports = (router) => {
     if (!system) return NotFoundResponse(ctx, 'System not found')
 
     const stations = await dbAsync.all(`
-      SELECT * FROM stations.stations WHERE systemName = @systemName COLLATE NOCASE
+      SELECT * FROM stations.stations WHERE systemName = @systemName
         AND (stationType = 'FleetCarrier' OR stationType = 'StrongholdCarrier')
         ORDER BY stationName
-      `,{ systemName })
-    ctx.body = stations
+      `, { systemName: system.systemName })
+
+    ctx.body = stations.filter(result => result.systemName === system.systemName)
   })
 
   router.get('/api/v1/carrier/ident/:carrierIdent', async (ctx, next) => {
     const { carrierIdent } = ctx.params
 
-    const carrier = await dbAsync.get(`SELECT * FROM stations.stations WHERE stationType = 'FleetCarrier' AND stationName = @carrierIdent`, { carrierIdent })
+    const carrier = await dbAsync.get('SELECT * FROM stations.stations WHERE stationType = \'FleetCarrier\' AND stationName = @carrierIdent', { carrierIdent })
     if (!carrier) return NotFoundResponse(ctx, 'Carrier not found')
+
     ctx.body = carrier
   })
 
@@ -184,7 +196,7 @@ module.exports = (router) => {
     const system = await getSystemByName(systemName)
     if (!system) return NotFoundResponse(ctx, 'System not found')
 
-    const commodities = await dbAsync.all('SELECT * FROM trade.commodities WHERE systemName = @systemName AND stationName = @stationName COLLATE NOCASE ORDER BY commodityName ASC', { systemName, stationName })
+    const commodities = await dbAsync.all('SELECT * FROM trade.commodities WHERE systemName = @systemName AND stationName = @stationName COLLATE NOCASE ORDER BY commodityName ASC', { systemName: system.systemName, stationName })
     if (commodities.length === 0) return NotFoundResponse(ctx, 'Market not found')
     ctx.body = commodities
   })
@@ -223,16 +235,16 @@ module.exports = (router) => {
         c.updatedAt
       FROM trade.commodities c
         LEFT JOIN stations.stations s ON c.marketId = s.marketId 
-      WHERE c.systemName = @systemName COLLATE NOCASE
+      WHERE c.systemName = @systemName
         ORDER BY commodityName ASC
-    `, { systemName })
-    ctx.body = commodities
+    `, { systemName: system.systemName })
+    ctx.body = commodities.filter(result => result.systemName === system.systemName)
   })
 
   router.get('/api/v1/system/name/:systemName/commodity/name/:commodityName', async (ctx, next) => {
-    const { 
+    const {
       systemName,
-      commodityName,
+      commodityName
     } = ctx.params
     const {
       maxDaysAgo = DEFAULT_MAX_RESULTS_AGE
@@ -273,8 +285,8 @@ module.exports = (router) => {
         AND c.commodityName = @commodityName
         AND c.updatedAtDay > '${getISODate(`-${maxDaysAgo}`)}'
       ORDER BY c.stationName
-      `, { systemName, commodityName })
-    ctx.body = commodities
+      `, { systemName: system.systemName, commodityName })
+    ctx.body = commodities.filter(result => result.systemName === system.systemName)
   })
 
   router.get('/api/v1/system/name/:systemName/commodities/imports', async (ctx, next) => {
@@ -327,12 +339,14 @@ module.exports = (router) => {
         c.updatedAt
       FROM trade.commodities c
         LEFT JOIN stations.stations s ON c.marketId = s.marketId 
-      WHERE c.systemName = @systemName COLLATE NOCASE
+      WHERE c.systemName = @systemName
         ${filters.join(' ')}
       ORDER BY c.commodityName ASC
-    `, { systemName })
+    `, { systemName: system.systemName })
 
-    ctx.body = commodities || 'No imported commodities'
+    ctx.body = commodities
+      ? commodities.filter(result => result.systemName === system.systemName)
+      : 'No imported commodities'
   })
 
   router.get('/api/v1/system/name/:systemName/commodities/exports', async (ctx, next) => {
@@ -386,12 +400,12 @@ module.exports = (router) => {
         c.updatedAt
       FROM trade.commodities c
         LEFT JOIN stations.stations s ON c.marketId = s.marketId 
-      WHERE c.systemName = @systemName COLLATE NOCASE
+      WHERE c.systemName = @systemName
         ${filters.join(' ')}
       ORDER BY c.commodityName ASC
-    `, { systemName })
+    `, { systemName: system.systemName })
 
-    ctx.body = commodities
+    ctx.body = commodities.filter(result => result.systemName === system.systemName)
   })
 
   router.get('/api/v1/system/name/:systemName/commodity/name/:commodityName/nearby/imports', async (ctx, next) => {
@@ -457,11 +471,11 @@ module.exports = (router) => {
       systemX,
       systemY,
       systemZ,
-      systemName,
+      systemName: system.systemName,
       maxDistance
     })
 
-    ctx.body = commodities
+    ctx.body = commodities.filter(result => result.systemName === system.systemName)
   })
 
   router.get('/api/v1/system/name/:systemName/commodity/name/:commodityName/nearby/exports', async (ctx, next) => {
@@ -528,11 +542,11 @@ module.exports = (router) => {
       systemX,
       systemY,
       systemZ,
-      systemName,
+      systemName: system.systemName,
       maxDistance
     })
 
-    ctx.body = commodities
+    ctx.body = commodities.filter(result => result.systemName === system.systemName)
   })
 
   router.get('/api/v1/system/name/:systemName/nearby', async (ctx, next) => {
@@ -556,21 +570,21 @@ module.exports = (router) => {
         ROUND(SQRT(POWER(systemX-@systemX,2)+POWER(systemY-@systemY,2)+POWER(systemZ-@systemZ,2))) AS distance
       FROM systems.systems
         WHERE systemSector IN ('${nearbySectors.join("', '")}')
-        AND systemName != @systemName
+        AND systemAddress != @systemAddress
         AND distance <= @maxDistance
       ORDER BY distance
         LIMIT ${MAX_NEARBY_SYSTEMS_RESULTS}`, {
       systemX,
       systemY,
       systemZ,
-      systemName,
+      systemAddress: system.systemAddress,
       maxDistance
     })
   })
 
   router.get('/api/v1/system/name/:systemName/nearest/:serviceType', async (ctx, next) => {
     const { systemName, serviceType } = ctx.params
-    let {
+    const {
       minLandingPadSize = 1
     } = ctx.query
 
@@ -580,10 +594,10 @@ module.exports = (router) => {
       'technology-broker': 'technologyBroker',
       'black-market': 'blackMarket',
       'universal-cartographics': 'universalCartographics',
-      'refuel': 'refuel',
-      'repair': 'repair',
-      'shipyard': 'shipyard',
-      'outfitting': 'outfitting',
+      refuel: 'refuel',
+      repair: 'repair',
+      shipyard: 'shipyard',
+      outfitting: 'outfitting',
       'search-and-rescue': 'searchAndRescue'
     }
     if (!serviceTypes[serviceType]) return NotFoundResponse(ctx, 'Service unknown')
@@ -608,12 +622,4 @@ module.exports = (router) => {
       systemZ
     })
   })
-
-  async function getSystemByName (systemName) {
-    const system = await dbAsync.all('SELECT * FROM systems.systems WHERE systemName = @systemName COLLATE NOCASE', { systemName })
-    // @FIXME Handle edge cases where there are multiple systems with same name
-    // (This is a very small number and all are unhinhabited, so low priority)
-    // if (system?.length === 1) return system
-    return system[0]
-  }
 }

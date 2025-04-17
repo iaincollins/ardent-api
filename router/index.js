@@ -3,7 +3,7 @@ const fs = require('fs')
 const KoaRouter = require('koa-router')
 const Package = require('../package.json')
 
-const { 
+const {
   ARDENT_API_BASE_URL,
   ARDENT_CACHE_DIR,
   ARDENT_BACKUP_DIR,

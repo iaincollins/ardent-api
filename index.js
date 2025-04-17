@@ -15,7 +15,6 @@ const process = require('process')
 const path = require('path')
 const fs = require('fs')
 const cron = require('node-cron')
-const { Z_SYNC_FLUSH } = require('zlib').constants
 const Koa = require('koa')
 const koaBodyParser = require('koa-bodyparser')
 const koaCompress = require('koa-compress')
