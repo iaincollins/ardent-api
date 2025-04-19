@@ -78,6 +78,8 @@ module.exports = (router) => {
           stationType = 'OnFootSettlement' OR
           stationType = 'Orbis' OR
           stationType = 'Outpost' OR
+          stationType = 'PlanetaryConstructionDepot' OR
+          stationType = 'SpaceConstructionDepot' OR
           stationType = 'StrongholdCarrier' OR
           stationType = 'SurfaceStation'
         )
