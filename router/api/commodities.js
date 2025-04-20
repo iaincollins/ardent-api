@@ -112,7 +112,7 @@ module.exports = (router) => {
       maxPrice = null,
       fleetCarriers = null,
       maxDaysAgo = DEFAULT_MAX_RESULTS_AGE,
-      systemAddress,
+      systemAddress = null,
       systemName = null,
       maxDistance = null
     } = ctx.query
@@ -157,6 +157,7 @@ module.exports = (router) => {
         s.maxLandingPadSize,
         s.bodyId,
         s.bodyName,
+        s.systemAddress,
         c.systemName,
         c.systemX,
         c.systemY,

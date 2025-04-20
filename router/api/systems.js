@@ -13,11 +13,6 @@ const MAX_NEARBY_SYSTEMS_RESULTS = 1000
 const MAX_NEARBY_COMMODITY_RESULTS = 1000
 const MAX_NEARBY_CONTACTS_RESULTS = 20
 
-// Note: The .filter(result => result.systemAddress === system.systemAddress) that is
-// applied before returning results is to ensure we only return correct data
-// for systems with case sensitive names like 'i_Carinae'/'I Carinae'.
-// That's also why we use the systemAddress (id64) when querying EDSM.
-
 module.exports = (router) => {
   router.get('/api/v1/system/:systemIdentiferType/:systemIdentifer', async (ctx, next) => {
     const { systemIdentiferType, systemIdentifer } = ctx.params
@@ -46,8 +41,19 @@ module.exports = (router) => {
     const { systemIdentiferType, systemIdentifer } = ctx.params
     const system = await getSystem(systemIdentifer, systemIdentiferType)
     if (!system) return NotFoundResponse(ctx, 'System not found')
-    const stations = await dbAsync.all('SELECT marketId, stationName, systemName, fleetCarrier, updatedAt FROM trade.commodities WHERE systemName = @systemName GROUP BY marketId ORDER BY stationName', { systemName: system.systemName })
-    ctx.body = stations.filter(result => result.systemAddress === system.systemAddress)
+    const stations = await dbAsync.all(`
+      SELECT
+        s.systemAddress,
+        s.systemName,
+        s.marketId,
+        s.stationName,
+        c.fleetCarrier,
+        c.updatedAt
+      FROM stations.stations s
+      LEFT JOIN trade.commodities c ON s.marketId = c.marketId
+        WHERE systemAddress = @systemAddress GROUP BY s.marketId ORDER BY s.stationName
+      `, { systemAddress: system.systemAddress })
+    ctx.body = stations
   })
 
   router.get('/api/v1/system/:systemIdentiferType/:systemIdentifer/stations', async (ctx, next) => {
@@ -59,7 +65,7 @@ module.exports = (router) => {
     // This is the most liberal interpretation of 'station', but is still
     // explicit to avoid returning stations where the type is unknown/invalid
     const stations = await dbAsync.all(`
-      SELECT * FROM stations.stations WHERE systemName = @systemName
+      SELECT * FROM stations.stations WHERE systemAddress = @systemAddress
       AND (
           stationType = 'AsteroidBase' OR
           stationType = 'Coriolis' OR 
@@ -77,8 +83,8 @@ module.exports = (router) => {
           stationType = 'SurfaceStation'
         )
       ORDER BY stationName
-    `, { systemName: system.systemName })
-    ctx.body = stations.filter(result => result.systemAddress === system.systemAddress)
+    `, { systemAddress: system.systemAddress })
+    ctx.body = stations
   })
 
   router.get('/api/v1/system/:systemIdentiferType/:systemIdentifer/stations/ports', async (ctx, next) => {
@@ -87,7 +93,7 @@ module.exports = (router) => {
     if (!system) return NotFoundResponse(ctx, 'System not found')
 
     const stations = await dbAsync.all(`
-      SELECT * FROM stations.stations WHERE systemName = @systemName
+      SELECT * FROM stations.stations WHERE systemAddress = @systemAddress
         AND (
             stationType = 'AsteroidBase' OR
             stationType = 'Coriolis' OR 
@@ -96,9 +102,9 @@ module.exports = (router) => {
             stationType = 'Orbis'
           )
         ORDER BY stationName
-      `, { systemName: system.systemName })
+      `, { systemAddress: system.systemAddress })
 
-    ctx.body = stations.filter(result => result.systemAddress === system.systemAddress)
+    ctx.body = stations
   })
 
   router.get('/api/v1/system/:systemIdentiferType/:systemIdentifer/stations/outposts', async (ctx, next) => {
@@ -107,12 +113,12 @@ module.exports = (router) => {
     if (!system) return NotFoundResponse(ctx, 'System not found')
 
     const stations = await dbAsync.all(`
-      SELECT * FROM stations.stations WHERE systemName = @systemName
+      SELECT * FROM stations.stations WHERE systemAddress = @systemAddress
         AND (stationType = 'Outpost' OR stationType = 'CraterOutpost')
         ORDER BY stationName
-      `, { systemName: system.systemName })
+      `, { systemAddress: system.systemAddress })
 
-    ctx.body = stations.filter(result => result.systemAddress === system.systemAddress)
+    ctx.body = stations
   })
 
   router.get('/api/v1/system/:systemIdentiferType/:systemIdentifer/stations/settlements', async (ctx, next) => {
@@ -121,12 +127,12 @@ module.exports = (router) => {
     if (!system) return NotFoundResponse(ctx, 'System not found')
 
     const stations = await dbAsync.all(`
-      SELECT * FROM stations.stations WHERE systemName = @systemName
+      SELECT * FROM stations.stations WHERE systemAddress = @systemAddress
         AND (stationType = 'OnFootSettlement')
         ORDER BY stationName
-      `, { systemName: system.systemName })
+      `, { systemAddress: system.systemAddress })
 
-    ctx.body = stations.filter(result => result.systemAddress === system.systemAddress)
+    ctx.body = stations
   })
 
   router.get('/api/v1/system/:systemIdentiferType/:systemIdentifer/stations/megaships', async (ctx, next) => {
@@ -135,12 +141,12 @@ module.exports = (router) => {
     if (!system) return NotFoundResponse(ctx, 'System not found')
 
     const stations = await dbAsync.all(`
-    SELECT * FROM stations.stations WHERE systemName = @systemName
+    SELECT * FROM stations.stations WHERE systemAddress = @systemAddress
       AND (stationType = 'MegaShip')
       ORDER BY stationName
-    `, { systemName: system.systemName })
+    `, { systemAddress: system.systemAddress })
 
-    ctx.body = stations.filter(result => result.systemAddress === system.systemAddress)
+    ctx.body = stations
   })
 
   router.get('/api/v1/system/:systemIdentiferType/:systemIdentifer/stations/carriers', async (ctx, next) => {
@@ -149,12 +155,12 @@ module.exports = (router) => {
     if (!system) return NotFoundResponse(ctx, 'System not found')
 
     const stations = await dbAsync.all(`
-      SELECT * FROM stations.stations WHERE systemName = @systemName
+      SELECT * FROM stations.stations WHERE systemAddress = @systemAddress
         AND (stationType = 'FleetCarrier' OR stationType = 'StrongholdCarrier')
         ORDER BY stationName
-      `, { systemName: system.systemName })
+      `, { systemAddress: system.systemAddress })
 
-    ctx.body = stations.filter(result => result.systemAddress === system.systemAddress)
+    ctx.body = stations
   })
 
   router.get('/api/v1/carrier/ident/:carrierIdent', async (ctx, next) => {
@@ -181,7 +187,38 @@ module.exports = (router) => {
     const system = await getSystem(systemIdentifer, systemIdentiferType)
     if (!system) return NotFoundResponse(ctx, 'System not found')
 
-    const commodities = await dbAsync.all('SELECT * FROM trade.commodities WHERE systemName = @systemName AND stationName = @stationName COLLATE NOCASE ORDER BY commodityName ASC', { systemName: system.systemName, stationName })
+    const commodities = await dbAsync.all(`
+      SELECT 
+        c.commodityId,
+        c.commodityName,
+        c.marketId,
+        c.stationName,
+        s.stationType,
+        s.distanceToArrival,
+        s.maxLandingPadSize,
+        s.bodyId,
+        s.bodyName,
+        s.systemAddress,
+        c.systemName,
+        c.systemX,
+        c.systemY,
+        c.systemZ,
+        c.fleetCarrier,
+        c.buyPrice,
+        c.demand,
+        c.demandBracket,
+        c.meanPrice,
+        c.sellPrice,
+        c.stock,
+        c.stockBracket,
+        c.statusFlags,
+        c.updatedAt
+      FROM trade.commodities c
+        LEFT JOIN stations.stations s ON c.marketId = s.marketId 
+      WHERE s.systemAddress = @systemAddress AND stationName = @stationName COLLATE NOCASE
+        ORDER BY commodityName ASC`,
+    { systemAddress: system.systemAddress, stationName }
+    )
     if (commodities.length === 0) return NotFoundResponse(ctx, 'Market not found')
     ctx.body = commodities
   })
@@ -219,10 +256,10 @@ module.exports = (router) => {
         c.updatedAt
       FROM trade.commodities c
         LEFT JOIN stations.stations s ON c.marketId = s.marketId 
-      WHERE c.systemName = @systemName
+      WHERE s.systemAddress = @systemAddress
         ORDER BY commodityName ASC
-    `, { systemName: system.systemName })
-    ctx.body = commodities.filter(result => result.systemAddress === system.systemAddress)
+    `, { systemAddress: system.systemAddress })
+    ctx.body = commodities
   })
 
   router.get('/api/v1/system/:systemIdentiferType/:systemIdentifer/commodity/name/:commodityName', async (ctx, next) => {
@@ -262,12 +299,12 @@ module.exports = (router) => {
         c.updatedAt
       FROM trade.commodities c
         LEFT JOIN stations.stations s ON c.marketId = s.marketId
-      WHERE c.systemName = @systemName
+      WHERE s.systemAddress = @systemAddress
         AND c.commodityName = @commodityName
         AND c.updatedAtDay > '${getISODate(`-${maxDaysAgo}`)}'
       ORDER BY c.stationName
-      `, { systemName: system.systemName, commodityName })
-    ctx.body = commodities.filter(result => result.systemAddress === system.systemAddress)
+      `, { systemAddress: system.systemAddress, commodityName })
+    ctx.body = commodities
   })
 
   router.get('/api/v1/system/:systemIdentiferType/:systemIdentifer/commodities/imports', async (ctx, next) => {
@@ -318,16 +355,13 @@ module.exports = (router) => {
         c.stockBracket,
         c.statusFlags,
         c.updatedAt
-      FROM trade.commodities c
-        LEFT JOIN stations.stations s ON c.marketId = s.marketId 
-      WHERE c.systemName = @systemName
+      FROM stations.stations s 
+        LEFT JOIN trade.commodities c ON c.marketId = s.marketId 
+      WHERE s.systemAddress = @systemAddress
         ${filters.join(' ')}
-      ORDER BY c.commodityName ASC
-    `, { systemName: system.systemName })
+    `, { systemAddress: system.systemAddress })
 
-    ctx.body = commodities
-      ? commodities.filter(result => result.systemAddress === system.systemAddress)
-      : 'No imported commodities'
+    ctx.body = commodities || 'No imported commodities'
   })
 
   router.get('/api/v1/system/:systemIdentiferType/:systemIdentifer/commodities/exports', async (ctx, next) => {
@@ -354,39 +388,38 @@ module.exports = (router) => {
     }
 
     const commodities = await dbAsync.all(`
-      SELECT
-        c.commodityId,
-        c.commodityName,
-        c.marketId,
-        c.stationName,
-        s.stationType,
-        s.distanceToArrival,
-        s.maxLandingPadSize,
-        s.bodyId,
-        s.bodyName,
-        s.systemAddress,
-        c.systemName,
-        c.systemX,
-        c.systemY,
-        c.systemZ,
-        c.fleetCarrier,
-        c.buyPrice,
-        c.demand,
-        c.demandBracket,
-        c.meanPrice,
-        c.sellPrice,
-        c.stock,
-        c.stockBracket,
-        c.statusFlags,
-        c.updatedAt
-      FROM trade.commodities c
-        LEFT JOIN stations.stations s ON c.marketId = s.marketId 
-      WHERE c.systemName = @systemName
+    SELECT 
+    c.commodityId,
+    c.commodityName,
+    c.marketId,
+    c.stationName,
+    s.stationType,
+    s.distanceToArrival,
+    s.maxLandingPadSize,
+    s.bodyId,
+    s.bodyName,
+    s.systemAddress,
+    c.systemName,
+    c.systemX,
+    c.systemY,
+    c.systemZ,
+    c.fleetCarrier,
+    c.buyPrice,
+    c.demand,
+    c.demandBracket,
+    c.meanPrice,
+    c.sellPrice,
+    c.stock,
+    c.stockBracket,
+    c.statusFlags,
+    c.updatedAt
+  FROM stations.stations s 
+    LEFT JOIN trade.commodities c ON c.marketId = s.marketId 
+  WHERE s.systemAddress = @systemAddress
         ${filters.join(' ')}
-      ORDER BY c.commodityName ASC
-    `, { systemName: system.systemName })
+    `, { systemAddress: system.systemAddress })
 
-    ctx.body = commodities.filter(result => result.systemAddress === system.systemAddress)
+    ctx.body = commodities || 'No exported commodities'
   })
 
   router.get('/api/v1/system/:systemIdentiferType/:systemIdentifer/commodity/name/:commodityName/nearby/imports', async (ctx, next) => {
@@ -442,7 +475,7 @@ module.exports = (router) => {
       FROM trade.commodities c 
         LEFT JOIN stations.stations s ON c.marketId = s.marketId 
       WHERE c.commodityName = @commodityName COLLATE NOCASE
-        AND c.systemName != @systemName
+        AND s.systemAddress != @systemAddress
         AND c.updatedAtDay > '${getISODate(`-${maxDaysAgo}`)}'
         AND distance <= @maxDistance
         ${filters.join(' ')}
@@ -452,11 +485,11 @@ module.exports = (router) => {
       systemX,
       systemY,
       systemZ,
-      systemName: system.systemName,
+      systemAddress: system.systemAddress,
       maxDistance
     })
 
-    ctx.body = commodities.filter(result => result.systemAddress === system.systemAddress)
+    ctx.body = commodities
   })
 
   router.get('/api/v1/system/:systemIdentiferType/:systemIdentifer/commodity/name/:commodityName/nearby/exports', async (ctx, next) => {
@@ -513,7 +546,7 @@ module.exports = (router) => {
       FROM trade.commodities c 
         LEFT JOIN stations.stations s ON c.marketId = s.marketId 
       WHERE c.commodityName = @commodityName COLLATE NOCASE
-        AND c.systemName != @systemName
+        AND s.systemAddress != @systemAddress
         AND c.updatedAtDay > '${getISODate(`-${maxDaysAgo}`)}'
         AND distance <= @maxDistance
         ${filters.join(' ')}
@@ -523,11 +556,11 @@ module.exports = (router) => {
       systemX,
       systemY,
       systemZ,
-      systemName: system.systemName,
+      systemAddress: system.systemAddress,
       maxDistance
     })
 
-    ctx.body = commodities.filter(result => result.systemAddress === system.systemAddress)
+    ctx.body = commodities
   })
 
   router.get('/api/v1/system/:systemIdentiferType/:systemIdentifer/nearby', async (ctx, next) => {
