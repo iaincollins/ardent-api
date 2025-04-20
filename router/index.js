@@ -46,7 +46,7 @@ router.get('/api/v1/stats/stations/types', async (ctx, next) => {
     total: 0,
     timestamp: new Date().toISOString()
   }
-  stationTypes.map(obj => {
+  stationTypes.forEach(obj => {
     result.stationTypes[obj.stationType] = obj.count
     result.total += obj.count
   })

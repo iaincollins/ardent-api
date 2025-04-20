@@ -4,7 +4,7 @@ const { paramAsBoolean, paramAsInt } = require('../../lib/utils/parse-query-para
 const NotFoundResponse = require('../../lib/response/not-found')
 const { getISODate } = require('../../lib/utils/dates')
 const { DEFAULT_MAX_RESULTS_AGE } = require('../../lib/consts')
-const getSystemByName = require('../../lib/utils/get-system-by-name')
+const { getSystem } = require('../../lib/utils/get-system')
 const EDSM = require('../../lib/edsm')
 
 const DEFAULT_NEARBY_SYSTEMS_DISTANCE = 100
@@ -13,53 +13,46 @@ const MAX_NEARBY_SYSTEMS_RESULTS = 1000
 const MAX_NEARBY_COMMODITY_RESULTS = 1000
 const MAX_NEARBY_CONTACTS_RESULTS = 20
 
-// Note: The .filter(result => result.systemName === system.systemName) that is
+// Note: The .filter(result => result.systemAddress === system.systemAddress) that is
 // applied before returning results is to ensure we only return correct data
 // for systems with case sensitive names like 'i_Carinae'/'I Carinae'.
 // That's also why we use the systemAddress (id64) when querying EDSM.
+
 module.exports = (router) => {
-  router.get('/api/v1/system/name/:systemName', async (ctx, next) => {
-    const { systemName } = ctx.params
-    const system = await getSystemByName(systemName)
+  router.get('/api/v1/system/:systemIdentiferType/:systemIdentifer', async (ctx, next) => {
+    const { systemIdentiferType, systemIdentifer } = ctx.params
+    const system = await getSystem(systemIdentifer, systemIdentiferType)
     if (!system) return NotFoundResponse(ctx, 'System not found')
     ctx.body = system
   })
 
-  // This function is currently mostly a pass through to the EDSM API
-  router.get('/api/v1/system/name/:systemName/status', async (ctx, next) => {
-    const { systemName } = ctx.params
-    const system = await getSystemByName(systemName)
+  router.get('/api/v1/system/:systemIdentiferType/:systemIdentifer/status', async (ctx, next) => {
+    const { systemIdentiferType, systemIdentifer } = ctx.params
+    const system = await getSystem(systemIdentifer, systemIdentiferType)
     if (!system) return NotFoundResponse(ctx, 'System not found')
     const systemStatus = await EDSM.getSystemStatus(system.systemAddress)
     ctx.body = systemStatus
   })
 
-  // This function is currently mostly a pass through to the EDSM API
-  router.get('/api/v1/system/name/:systemName/bodies', async (ctx, next) => {
-    const { systemName } = ctx.params
-    const system = await getSystemByName(systemName)
+  router.get('/api/v1/system/:systemIdentiferType/:systemIdentifer/bodies', async (ctx, next) => {
+    const { systemIdentiferType, systemIdentifer } = ctx.params
+    const system = await getSystem(systemIdentifer, systemIdentiferType)
     if (!system) return NotFoundResponse(ctx, 'System not found')
     const systemBodies = await EDSM.getSystemBodies(system.systemAddress)
     ctx.body = systemBodies
   })
 
-  router.get('/api/v1/system/name/:systemName/markets', async (ctx, next) => {
-    const { systemName } = ctx.params
-
-    // Validate system name
-    const system = await getSystemByName(systemName)
+  router.get('/api/v1/system/:systemIdentiferType/:systemIdentifer/markets', async (ctx, next) => {
+    const { systemIdentiferType, systemIdentifer } = ctx.params
+    const system = await getSystem(systemIdentifer, systemIdentiferType)
     if (!system) return NotFoundResponse(ctx, 'System not found')
-
     const stations = await dbAsync.all('SELECT marketId, stationName, systemName, fleetCarrier, updatedAt FROM trade.commodities WHERE systemName = @systemName GROUP BY marketId ORDER BY stationName', { systemName: system.systemName })
-
-    ctx.body = stations.filter(result => result.systemName === system.systemName)
+    ctx.body = stations.filter(result => result.systemAddress === system.systemAddress)
   })
 
-  router.get('/api/v1/system/name/:systemName/stations', async (ctx, next) => {
-    const { systemName } = ctx.params
-
-    // Validate system name
-    const system = await getSystemByName(systemName)
+  router.get('/api/v1/system/:systemIdentiferType/:systemIdentifer/stations', async (ctx, next) => {
+    const { systemIdentiferType, systemIdentifer } = ctx.params
+    const system = await getSystem(systemIdentifer, systemIdentiferType)
     if (!system) return NotFoundResponse(ctx, 'System not found')
 
     // An explicit list of all known dockable station types
@@ -85,14 +78,12 @@ module.exports = (router) => {
         )
       ORDER BY stationName
     `, { systemName: system.systemName })
-    ctx.body = stations.filter(result => result.systemName === system.systemName)
+    ctx.body = stations.filter(result => result.systemAddress === system.systemAddress)
   })
 
-  router.get('/api/v1/system/name/:systemName/stations/ports', async (ctx, next) => {
-    const { systemName } = ctx.params
-
-    // Validate system name
-    const system = await getSystemByName(systemName)
+  router.get('/api/v1/system/:systemIdentiferType/:systemIdentifer/stations/ports', async (ctx, next) => {
+    const { systemIdentiferType, systemIdentifer } = ctx.params
+    const system = await getSystem(systemIdentifer, systemIdentiferType)
     if (!system) return NotFoundResponse(ctx, 'System not found')
 
     const stations = await dbAsync.all(`
@@ -107,14 +98,12 @@ module.exports = (router) => {
         ORDER BY stationName
       `, { systemName: system.systemName })
 
-    ctx.body = stations.filter(result => result.systemName === system.systemName)
+    ctx.body = stations.filter(result => result.systemAddress === system.systemAddress)
   })
 
-  router.get('/api/v1/system/name/:systemName/stations/outposts', async (ctx, next) => {
-    const { systemName } = ctx.params
-
-    // Validate system name
-    const system = await getSystemByName(systemName)
+  router.get('/api/v1/system/:systemIdentiferType/:systemIdentifer/stations/outposts', async (ctx, next) => {
+    const { systemIdentiferType, systemIdentifer } = ctx.params
+    const system = await getSystem(systemIdentifer, systemIdentiferType)
     if (!system) return NotFoundResponse(ctx, 'System not found')
 
     const stations = await dbAsync.all(`
@@ -123,14 +112,12 @@ module.exports = (router) => {
         ORDER BY stationName
       `, { systemName: system.systemName })
 
-    ctx.body = stations.filter(result => result.systemName === system.systemName)
+    ctx.body = stations.filter(result => result.systemAddress === system.systemAddress)
   })
 
-  router.get('/api/v1/system/name/:systemName/stations/settlements', async (ctx, next) => {
-    const { systemName } = ctx.params
-
-    // Validate system name
-    const system = await getSystemByName(systemName)
+  router.get('/api/v1/system/:systemIdentiferType/:systemIdentifer/stations/settlements', async (ctx, next) => {
+    const { systemIdentiferType, systemIdentifer } = ctx.params
+    const system = await getSystem(systemIdentifer, systemIdentiferType)
     if (!system) return NotFoundResponse(ctx, 'System not found')
 
     const stations = await dbAsync.all(`
@@ -139,14 +126,12 @@ module.exports = (router) => {
         ORDER BY stationName
       `, { systemName: system.systemName })
 
-    ctx.body = stations.filter(result => result.systemName === system.systemName)
+    ctx.body = stations.filter(result => result.systemAddress === system.systemAddress)
   })
 
-  router.get('/api/v1/system/name/:systemName/stations/megaships', async (ctx, next) => {
-    const { systemName } = ctx.params
-
-    // Validate system name
-    const system = await getSystemByName(systemName)
+  router.get('/api/v1/system/:systemIdentiferType/:systemIdentifer/stations/megaships', async (ctx, next) => {
+    const { systemIdentiferType, systemIdentifer } = ctx.params
+    const system = await getSystem(systemIdentifer, systemIdentiferType)
     if (!system) return NotFoundResponse(ctx, 'System not found')
 
     const stations = await dbAsync.all(`
@@ -155,14 +140,12 @@ module.exports = (router) => {
       ORDER BY stationName
     `, { systemName: system.systemName })
 
-    ctx.body = stations.filter(result => result.systemName === system.systemName)
+    ctx.body = stations.filter(result => result.systemAddress === system.systemAddress)
   })
 
-  router.get('/api/v1/system/name/:systemName/stations/carriers', async (ctx, next) => {
-    const { systemName } = ctx.params
-
-    // Validate system name
-    const system = await getSystemByName(systemName)
+  router.get('/api/v1/system/:systemIdentiferType/:systemIdentifer/stations/carriers', async (ctx, next) => {
+    const { systemIdentiferType, systemIdentifer } = ctx.params
+    const system = await getSystem(systemIdentifer, systemIdentiferType)
     if (!system) return NotFoundResponse(ctx, 'System not found')
 
     const stations = await dbAsync.all(`
@@ -171,7 +154,7 @@ module.exports = (router) => {
         ORDER BY stationName
       `, { systemName: system.systemName })
 
-    ctx.body = stations.filter(result => result.systemName === system.systemName)
+    ctx.body = stations.filter(result => result.systemAddress === system.systemAddress)
   })
 
   router.get('/api/v1/carrier/ident/:carrierIdent', async (ctx, next) => {
@@ -191,11 +174,11 @@ module.exports = (router) => {
     ctx.body = commodities
   })
 
-  router.get('/api/v1/system/name/:systemName/market/name/:stationName/commodities', async (ctx, next) => {
-    const { systemName, stationName } = ctx.params
-
-    // Validate system name
-    const system = await getSystemByName(systemName)
+  // Note: If you know the specific Market ID you don't need to specify the
+  // system, you can query the `/market/:marketId/commodities` endpoint
+  router.get('/api/v1/system/:systemIdentiferType/:systemIdentifer/market/name/:stationName/commodities', async (ctx, next) => {
+    const { systemIdentiferType, systemIdentifer, stationName } = ctx.params
+    const system = await getSystem(systemIdentifer, systemIdentiferType)
     if (!system) return NotFoundResponse(ctx, 'System not found')
 
     const commodities = await dbAsync.all('SELECT * FROM trade.commodities WHERE systemName = @systemName AND stationName = @stationName COLLATE NOCASE ORDER BY commodityName ASC', { systemName: system.systemName, stationName })
@@ -203,11 +186,9 @@ module.exports = (router) => {
     ctx.body = commodities
   })
 
-  router.get('/api/v1/system/name/:systemName/commodities', async (ctx, next) => {
-    const { systemName } = ctx.params
-
-    // Validate system name
-    const system = await getSystemByName(systemName)
+  router.get('/api/v1/system/:systemIdentiferType/:systemIdentifer/commodities', async (ctx, next) => {
+    const { systemIdentiferType, systemIdentifer } = ctx.params
+    const system = await getSystem(systemIdentifer, systemIdentiferType)
     if (!system) return NotFoundResponse(ctx, 'System not found')
 
     const commodities = await dbAsync.all(`
@@ -221,6 +202,7 @@ module.exports = (router) => {
         s.maxLandingPadSize,
         s.bodyId,
         s.bodyName,
+        s.systemAddress,
         c.systemName,
         c.systemX,
         c.systemY,
@@ -240,21 +222,17 @@ module.exports = (router) => {
       WHERE c.systemName = @systemName
         ORDER BY commodityName ASC
     `, { systemName: system.systemName })
-    ctx.body = commodities.filter(result => result.systemName === system.systemName)
+    ctx.body = commodities.filter(result => result.systemAddress === system.systemAddress)
   })
 
-  router.get('/api/v1/system/name/:systemName/commodity/name/:commodityName', async (ctx, next) => {
-    const {
-      systemName,
-      commodityName
-    } = ctx.params
+  router.get('/api/v1/system/:systemIdentiferType/:systemIdentifer/commodity/name/:commodityName', async (ctx, next) => {
+    const { systemIdentiferType, systemIdentifer, commodityName } = ctx.params
+    const system = await getSystem(systemIdentifer, systemIdentiferType)
+    if (!system) return NotFoundResponse(ctx, 'System not found')
+
     const {
       maxDaysAgo = DEFAULT_MAX_RESULTS_AGE
     } = ctx.query
-
-    // Validate system name
-    const system = await getSystemByName(systemName)
-    if (!system) return NotFoundResponse(ctx, 'System not found')
 
     const commodities = await dbAsync.all(`
       SELECT
@@ -267,6 +245,7 @@ module.exports = (router) => {
         s.maxLandingPadSize,
         s.bodyId,
         s.bodyName,
+        s.systemAddress,
         c.systemName,
         c.systemX,
         c.systemY,
@@ -288,21 +267,20 @@ module.exports = (router) => {
         AND c.updatedAtDay > '${getISODate(`-${maxDaysAgo}`)}'
       ORDER BY c.stationName
       `, { systemName: system.systemName, commodityName })
-    ctx.body = commodities.filter(result => result.systemName === system.systemName)
+    ctx.body = commodities.filter(result => result.systemAddress === system.systemAddress)
   })
 
-  router.get('/api/v1/system/name/:systemName/commodities/imports', async (ctx, next) => {
-    const { systemName } = ctx.params
+  router.get('/api/v1/system/:systemIdentiferType/:systemIdentifer/commodities/imports', async (ctx, next) => {
+    const { systemIdentiferType, systemIdentifer } = ctx.params
+    const system = await getSystem(systemIdentifer, systemIdentiferType)
+    if (!system) return NotFoundResponse(ctx, 'System not found')
+
     const {
       minVolume = 1,
       minPrice = 1,
       fleetCarriers = null,
       maxDaysAgo = DEFAULT_MAX_RESULTS_AGE
     } = ctx.query
-
-    // Validate system name
-    const system = await getSystemByName(systemName)
-    if (!system) return NotFoundResponse(ctx, 'System not found')
 
     const filters = [
       `AND (c.demand >= ${parseInt(minVolume)} OR c.demand = 0)`, // Zero is infinite demand
@@ -325,6 +303,7 @@ module.exports = (router) => {
         s.maxLandingPadSize,
         s.bodyId,
         s.bodyName,
+        s.systemAddress,
         c.systemName,
         c.systemX,
         c.systemY,
@@ -347,22 +326,21 @@ module.exports = (router) => {
     `, { systemName: system.systemName })
 
     ctx.body = commodities
-      ? commodities.filter(result => result.systemName === system.systemName)
+      ? commodities.filter(result => result.systemAddress === system.systemAddress)
       : 'No imported commodities'
   })
 
-  router.get('/api/v1/system/name/:systemName/commodities/exports', async (ctx, next) => {
-    const { systemName } = ctx.params
+  router.get('/api/v1/system/:systemIdentiferType/:systemIdentifer/commodities/exports', async (ctx, next) => {
+    const { systemIdentiferType, systemIdentifer } = ctx.params
+    const system = await getSystem(systemIdentifer, systemIdentiferType)
+    if (!system) return NotFoundResponse(ctx, 'System not found')
+
     const {
       minVolume = 1,
       maxPrice = null,
       fleetCarriers = null,
       maxDaysAgo = DEFAULT_MAX_RESULTS_AGE
     } = ctx.query
-
-    // Validate system name
-    const system = await getSystemByName(systemName)
-    if (!system) return NotFoundResponse(ctx, 'System not found')
 
     const filters = [
       `AND c.stock >= ${parseInt(minVolume)}`,
@@ -386,6 +364,7 @@ module.exports = (router) => {
         s.maxLandingPadSize,
         s.bodyId,
         s.bodyName,
+        s.systemAddress,
         c.systemName,
         c.systemX,
         c.systemY,
@@ -407,11 +386,15 @@ module.exports = (router) => {
       ORDER BY c.commodityName ASC
     `, { systemName: system.systemName })
 
-    ctx.body = commodities.filter(result => result.systemName === system.systemName)
+    ctx.body = commodities.filter(result => result.systemAddress === system.systemAddress)
   })
 
-  router.get('/api/v1/system/name/:systemName/commodity/name/:commodityName/nearby/imports', async (ctx, next) => {
-    const { systemName, commodityName } = ctx.params
+  router.get('/api/v1/system/:systemIdentiferType/:systemIdentifer/commodity/name/:commodityName/nearby/imports', async (ctx, next) => {
+    const { systemIdentiferType, systemIdentifer, commodityName } = ctx.params
+    const system = await getSystem(systemIdentifer, systemIdentiferType)
+    if (!system) return NotFoundResponse(ctx, 'System not found')
+    const { systemX, systemY, systemZ } = system
+
     let {
       minVolume = 1,
       minPrice = 1,
@@ -421,11 +404,6 @@ module.exports = (router) => {
     } = ctx.query
     if (maxDistance > MAX_NEARBY_SYSTEMS_DISTANCE) { maxDistance = MAX_NEARBY_SYSTEMS_DISTANCE }
     maxDistance = parseInt(maxDistance)
-
-    // Validate system name
-    const system = await getSystemByName(systemName)
-    if (!system) return NotFoundResponse(ctx, 'System not found')
-    const { systemX, systemY, systemZ } = system
 
     const filters = [
       `AND (c.demand >= ${parseInt(minVolume)} OR c.demand = 0)`, // Zero is infinite demand
@@ -445,6 +423,7 @@ module.exports = (router) => {
         s.maxLandingPadSize,
         s.bodyId,
         s.bodyName,
+        s.systemAddress,
         c.systemName,
         c.systemX,
         c.systemY,
@@ -477,11 +456,15 @@ module.exports = (router) => {
       maxDistance
     })
 
-    ctx.body = commodities.filter(result => result.systemName === system.systemName)
+    ctx.body = commodities.filter(result => result.systemAddress === system.systemAddress)
   })
 
-  router.get('/api/v1/system/name/:systemName/commodity/name/:commodityName/nearby/exports', async (ctx, next) => {
-    const { systemName, commodityName } = ctx.params
+  router.get('/api/v1/system/:systemIdentiferType/:systemIdentifer/commodity/name/:commodityName/nearby/exports', async (ctx, next) => {
+    const { systemIdentiferType, systemIdentifer, commodityName } = ctx.params
+    const system = await getSystem(systemIdentifer, systemIdentiferType)
+    if (!system) return NotFoundResponse(ctx, 'System not found')
+    const { systemX, systemY, systemZ } = system
+
     let {
       minVolume = 1,
       maxPrice = null,
@@ -491,11 +474,6 @@ module.exports = (router) => {
     } = ctx.query
     if (maxDistance > MAX_NEARBY_SYSTEMS_DISTANCE) { maxDistance = MAX_NEARBY_SYSTEMS_DISTANCE }
     maxDistance = parseInt(maxDistance)
-
-    // Validate system name
-    const system = await getSystemByName(systemName)
-    if (!system) return NotFoundResponse(ctx, 'System not found')
-    const { systemX, systemY, systemZ } = system
 
     const filters = [
       `AND c.stock >= ${parseInt(minVolume)}`
@@ -516,6 +494,7 @@ module.exports = (router) => {
         s.maxLandingPadSize,
         s.bodyId,
         s.bodyName,
+        s.systemAddress,
         c.systemName,
         c.systemX,
         c.systemY,
@@ -548,22 +527,19 @@ module.exports = (router) => {
       maxDistance
     })
 
-    ctx.body = commodities.filter(result => result.systemName === system.systemName)
+    ctx.body = commodities.filter(result => result.systemAddress === system.systemAddress)
   })
 
-  router.get('/api/v1/system/name/:systemName/nearby', async (ctx, next) => {
-    const { systemName } = ctx.params
-    let {
-      maxDistance = DEFAULT_NEARBY_SYSTEMS_DISTANCE
-    } = ctx.query
+  router.get('/api/v1/system/:systemIdentiferType/:systemIdentifer/nearby', async (ctx, next) => {
+    const { systemIdentiferType, systemIdentifer } = ctx.params
+    const system = await getSystem(systemIdentifer, systemIdentiferType)
+    if (!system) return NotFoundResponse(ctx, 'System not found')
+    const { systemX, systemY, systemZ } = system
+
+    let { maxDistance = DEFAULT_NEARBY_SYSTEMS_DISTANCE } = ctx.query
 
     if (maxDistance > MAX_NEARBY_SYSTEMS_DISTANCE) { maxDistance = MAX_NEARBY_SYSTEMS_DISTANCE }
     maxDistance = parseInt(maxDistance)
-
-    const system = await getSystemByName(systemName)
-    if (!system) return NotFoundResponse(ctx, 'System not found')
-
-    const { systemX, systemY, systemZ } = system
 
     const nearbySectors = getNearbySystemSectors(systemX, systemY, systemZ, maxDistance)
     ctx.body = await dbAsync.all(`
@@ -584,11 +560,13 @@ module.exports = (router) => {
     })
   })
 
-  router.get('/api/v1/system/name/:systemName/nearest/:serviceType', async (ctx, next) => {
-    const { systemName, serviceType } = ctx.params
-    const {
-      minLandingPadSize = 1
-    } = ctx.query
+  router.get('/api/v1/system/:systemIdentiferType/:systemIdentifer/nearest/:serviceType', async (ctx, next) => {
+    const { systemIdentiferType, systemIdentifer, serviceType } = ctx.params
+    const system = await getSystem(systemIdentifer, systemIdentiferType)
+    if (!system) return NotFoundResponse(ctx, 'System not found')
+    const { systemX, systemY, systemZ } = system
+
+    const { minLandingPadSize = 1 } = ctx.query
 
     const serviceTypes = {
       'interstellar-factors': 'interstellarFactors',
@@ -603,11 +581,6 @@ module.exports = (router) => {
       'search-and-rescue': 'searchAndRescue'
     }
     if (!serviceTypes[serviceType]) return NotFoundResponse(ctx, 'Service unknown')
-
-    const system = await getSystemByName(systemName)
-    if (!system) return NotFoundResponse(ctx, 'System not found')
-
-    const { systemX, systemY, systemZ } = system
 
     ctx.body = await dbAsync.all(`
       SELECT

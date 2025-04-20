@@ -5,7 +5,7 @@ const dbAsync = require('../../lib/db/db-async')
 const { ARDENT_CACHE_DIR, DEFAULT_MAX_RESULTS_AGE } = require('../../lib/consts')
 const NotFoundResponse = require('../../lib/response/not-found')
 const { getISODate } = require('../../lib/utils/dates')
-const getSystemByName = require('../../lib/utils/get-system-by-name')
+const { getSystem } = require('../../lib/utils/get-system')
 
 const COMMODITIES_REPORT = path.join(ARDENT_CACHE_DIR, 'commodities.json')
 const MAX_COMMODITY_SORTED_RESULTS = 100
@@ -36,13 +36,12 @@ module.exports = (router) => {
       minPrice = 1,
       fleetCarriers = null,
       maxDaysAgo = DEFAULT_MAX_RESULTS_AGE,
+      systemAddress = null,
       systemName = null,
       maxDistance = null
     } = ctx.query
 
-    const sqlQueryParams = {
-      commodityName
-    }
+    const sqlQueryParams = { commodityName }
 
     const filters = [
       `AND (c.demand >= ${parseInt(minVolume)} OR c.demand = 0)`, // Zero is infinite demand
@@ -50,13 +49,15 @@ module.exports = (router) => {
       `AND c.updatedAtDay > '${getISODate(`-${maxDaysAgo}`)}'`
     ]
 
-    if (systemName) {
-      const system = await getSystemByName(systemName)
+    const systemSpecified = (systemAddress || systemName)
+    if (systemSpecified) {
+      const systemIdentifer = systemAddress ?? systemName
+      const systemIdentiferType = systemAddress ? 'address' : 'name'
+      const system = await getSystem(systemIdentifer, systemIdentiferType)
       if (!system) return NotFoundResponse(ctx, 'System not found')
       sqlQueryParams.systemX = system.systemX
       sqlQueryParams.systemY = system.systemY
       sqlQueryParams.systemZ = system.systemZ
-
       if (maxDistance) {
         if (maxDistance > MAX_COMMODITY_SEARCH_DISTANCE) { maxDistance = MAX_COMMODITY_SEARCH_DISTANCE }
         maxDistance = parseInt(maxDistance)
@@ -77,6 +78,7 @@ module.exports = (router) => {
         s.maxLandingPadSize,
         s.bodyId,
         s.bodyName,
+        s.systemAddress,
         c.systemName,
         c.systemX,
         c.systemY,
@@ -91,12 +93,12 @@ module.exports = (router) => {
         c.stockBracket,
         c.statusFlags,
         c.updatedAt
-          ${systemName ? ', ROUND(SQRT(POWER(c.systemX-@systemX,2)+POWER(c.systemY-@systemY,2)+POWER(c.systemZ-@systemZ,2))) AS distance' : ''}
+          ${systemSpecified ? ', ROUND(SQRT(POWER(c.systemX-@systemX,2)+POWER(c.systemY-@systemY,2)+POWER(c.systemZ-@systemZ,2))) AS distance' : ''}
         FROM trade.commodities c 
           LEFT JOIN stations.stations s ON c.marketId = s.marketId
         WHERE c.commodityName = @commodityName COLLATE NOCASE
           ${filters.join(' ')}
-          ${systemName && maxDistance ? ' AND distance <= @maxDistance' : ''}
+          ${systemSpecified && maxDistance ? ' AND distance <= @maxDistance' : ''}
         ORDER BY c.sellPrice DESC
           LIMIT ${MAX_COMMODITY_SORTED_RESULTS}`, sqlQueryParams)
 
@@ -110,6 +112,7 @@ module.exports = (router) => {
       maxPrice = null,
       fleetCarriers = null,
       maxDaysAgo = DEFAULT_MAX_RESULTS_AGE,
+      systemAddress,
       systemName = null,
       maxDistance = null
     } = ctx.query
@@ -123,13 +126,15 @@ module.exports = (router) => {
       `AND c.updatedAtDay > '${getISODate(`-${maxDaysAgo}`)}'`
     ]
 
-    if (systemName) {
-      const system = await getSystemByName(systemName)
+    const systemSpecified = (systemAddress || systemName)
+    if (systemSpecified) {
+      const systemIdentifer = systemAddress ?? systemName
+      const systemIdentiferType = systemAddress ? 'address' : 'name'
+      const system = await getSystem(systemIdentifer, systemIdentiferType)
       if (!system) return NotFoundResponse(ctx, 'System not found')
       sqlQueryParams.systemX = system.systemX
       sqlQueryParams.systemY = system.systemY
       sqlQueryParams.systemZ = system.systemZ
-
       if (maxDistance) {
         if (maxDistance > MAX_COMMODITY_SEARCH_DISTANCE) { maxDistance = MAX_COMMODITY_SEARCH_DISTANCE }
         maxDistance = parseInt(maxDistance)
@@ -166,12 +171,12 @@ module.exports = (router) => {
         c.stockBracket,
         c.statusFlags,
         c.updatedAt
-          ${systemName ? ', ROUND(SQRT(POWER(c.systemX-@systemX,2)+POWER(c.systemY-@systemY,2)+POWER(c.systemZ-@systemZ,2))) AS distance' : ''}
+          ${systemSpecified ? ', ROUND(SQRT(POWER(c.systemX-@systemX,2)+POWER(c.systemY-@systemY,2)+POWER(c.systemZ-@systemZ,2))) AS distance' : ''}
         FROM trade.commodities c 
           LEFT JOIN stations.stations s ON c.marketId = s.marketId
         WHERE c.commodityName = @commodityName COLLATE NOCASE
           ${filters.join(' ')}
-          ${systemName && maxDistance ? ' AND distance <= @maxDistance' : ''}
+          ${systemSpecified && maxDistance ? ' AND distance <= @maxDistance' : ''}
         ORDER BY c.buyPrice ASC
           LIMIT ${MAX_COMMODITY_SORTED_RESULTS}`, sqlQueryParams)
 
