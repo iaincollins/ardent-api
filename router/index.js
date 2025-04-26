@@ -41,39 +41,46 @@ router.get('/api/v1/stats/stations/types', async (ctx, next) => {
       GROUP By stationType
       ORDER BY stationType
     `)
-  const result = {
+  const response = {
     stationTypes: {},
     total: 0,
     timestamp: new Date().toISOString()
   }
   stationTypes.forEach(obj => {
-    result.stationTypes[obj.stationType] = obj.count
-    result.total += obj.count
+    response.stationTypes[obj.stationType] = obj.count
+    response.total += obj.count
   })
-  ctx.body = result
+  ctx.body = response
 })
 
 router.get('/api/v1/stats/stations/economies', async (ctx, next) => {
   const primaryEconomies  = await dbAsync.all(`
       SELECT primaryEconomy, COUNT(*) as count FROM stations
+        WHERE stationType != 'FleetCarrier'
         GROUP By primaryEconomy
         ORDER BY primaryEconomy
     `)
   const secondaryEconomies = await dbAsync.all(`
     SELECT secondaryEconomy, COUNT(*) as count FROM stations
+      WHERE stationType != 'FleetCarrier'
       GROUP By secondaryEconomy
       ORDER BY secondaryEconomy
     `)
-  const primary = {}
-  primaryEconomies.forEach(result => primary[result['primaryEconomy']] = result['count'])
-  const secondary = {}
-  secondaryEconomies.forEach(result => secondary[result['secondaryEconomy']] = result['count'])
-  const result = {
-    primary,
-    secondary,
+  const fleetCarriers = await dbAsync.get(`
+    SELECT COUNT(*) as count FROM stations WHERE stationType = 'FleetCarrier'
+  `)
+
+  const response = {
+    primary: {},
+    secondary: {},
+    fleetCarriers: fleetCarriers['count'],
     timestamp: new Date().toISOString()
   }
-  ctx.body = result
+
+  primaryEconomies.forEach(result => response.primary[result['primaryEconomy']] = result['count'])
+  secondaryEconomies.forEach(result => response.secondary[result['secondaryEconomy']] = result['count'])
+
+  ctx.body = response
 })
 
 router.get('/api/v1/backup', (ctx, next) => {
