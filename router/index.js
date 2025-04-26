@@ -53,6 +53,29 @@ router.get('/api/v1/stats/stations/types', async (ctx, next) => {
   ctx.body = result
 })
 
+router.get('/api/v1/stats/stations/economies', async (ctx, next) => {
+  const primaryEconomies  = await dbAsync.all(`
+      SELECT primaryEconomy, COUNT(*) as count FROM stations
+        GROUP By primaryEconomy
+        ORDER BY primaryEconomy
+    `)
+  const secondaryEconomies = await dbAsync.all(`
+    SELECT secondaryEconomy, COUNT(*) as count FROM stations
+      GROUP By secondaryEconomy
+      ORDER BY secondaryEconomy
+    `)
+  const primary = {}
+  primaryEconomies.forEach(result => primary[result['primaryEconomy']] = result['count'])
+  const secondary = {}
+  secondaryEconomies.forEach(result => secondary[result['secondaryEconomy']] = result['count'])
+  const result = {
+    primary,
+    secondary,
+    timestamp: new Date().toISOString()
+  }
+  ctx.body = result
+})
+
 router.get('/api/v1/backup', (ctx, next) => {
   const backups = JSON.parse(fs.readFileSync(path.join(ARDENT_BACKUP_DIR, 'backup.json')))
   const downloads = JSON.parse(fs.readFileSync(path.join(ARDENT_DOWNLOADS_DIR, 'downloads.json')))
