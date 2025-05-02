@@ -22,7 +22,7 @@ The Ardent API provides access to data submitted to the Elite Dangerous Data
 Network and is stored by the 
 [Ardent Collector](https://github.com/iaincollins/ardent-collector/).
 
-The API provide an interface to look up locaiton data for 100,000,000 star systems and
+The API provides an interface to look up locaiton data for 100,000,000 star systems and
 tracks millions of buy and sell orders for trade commodities sold in stations,
 ports and on fleet carriers throughout the known galaxy.
 
@@ -60,6 +60,33 @@ functionality is expanded on and refined (e.g. what results are filtered out,
 or not filterd out, by default may change - but any changes to requests or 
 responses should typically be additive rather than be breaking changes).
 
+* The examples below show using system name in queries. The API is
+*case preserving* but case insensitive when dealing with system names.
+
+You can also use the 64 bit system ID to query the API, the documentation is
+still being updated to reflect this.
+
+For example, the following queries are equivalent:
+
+* https://api.ardent-insight.com/v1/system/name/Sol
+* https://api.ardent-insight.com/v1/system/address/10477373803
+
+As are these requests:
+
+* https://api.ardent-insight.com/v1/system/name/Sol/stations
+* https://api.ardent-insight.com/v1/system/address/10477373803/stations
+
+Using the ID allows for disambiguation in cases where there is more than 
+one system with the same name. The service also helps to provide a hint when 
+querying if there is known to be a another system with the same name.
+
+See the following responses as an example:
+
+* https://api.ardent-insight.com/v1/system/name/C%20Velorum
+* https://api.ardent-insight.com/v1/system/name/i%20Carinae
+* https://api.ardent-insight.com/v1/system/address/5533856349
+* https://api.ardent-insight.com/v1/search/system/name/C%20Vel
+
 ### Get version
 
 Get Ardent API software version.
@@ -82,6 +109,11 @@ Get statistics for the current databases (updated every 15 minutes).
     Trade updates in last 7 days: 2,475,140
     Trade updates in last 30 days: 7,234,476
 ```
+
+Additional stats endpoints for stations data:
+
+* https://api.ardent-industry.com/v1/stats/stations/economies
+* https://api.ardent-industry.com/v1/stats/stations/types
 
 ### Get commodities reports
 
