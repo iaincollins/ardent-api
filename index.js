@@ -47,11 +47,14 @@ const updateGalnetNews = require('./lib/cron-tasks/galnet-news')
     return next()
   })
 
-  // Enable content compression
   app.use(koaCompress())
-
+  router.get('/api/robots.txt', async (ctx) => {
+    ctx.type = 'text/plain'
+    ctx.body = `User-agent: *\nDisallow: /*`
+  })
   router.get('/', (ctx) => { ctx.body = printStats() })
   router.get('/api', (ctx) => { ctx.body = printStats() })
+
   app.use(router.routes())
 
   updateCommodityTicker()
