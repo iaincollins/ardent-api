@@ -20,13 +20,13 @@ const routes = {
 const router = new KoaRouter()
 const dbAsync = require('../lib/db/db-async')
 
-router.get('/api/v1', (ctx, next) => ctx.redirect(`${ARDENT_API_BASE_URL}/v1/stats`))
+router.get('/api/v2', (ctx, next) => ctx.redirect(`${ARDENT_API_BASE_URL}/v2/stats`))
 
-router.get('/api/v1/version', (ctx, next) => {
+router.get('/api/v2/version', (ctx, next) => {
   ctx.body = { version: Package.version }
 })
 
-router.get('/api/v1/stats', (ctx, next) => {
+router.get('/api/v2/stats', (ctx, next) => {
   try {
     ctx.body = JSON.parse(fs.readFileSync(path.join(ARDENT_CACHE_DIR, 'database-stats.json')))
   } catch (e) {
@@ -35,7 +35,7 @@ router.get('/api/v1/stats', (ctx, next) => {
   }
 })
 
-router.get('/api/v1/stats/stations/types', async (ctx, next) => {
+router.get('/api/v2/stats/stations/types', async (ctx, next) => {
   const stationTypes = await dbAsync.all(`
       SELECT stationType, COUNT(*) as count FROM stations
       GROUP By stationType
@@ -53,8 +53,8 @@ router.get('/api/v1/stats/stations/types', async (ctx, next) => {
   ctx.body = response
 })
 
-router.get('/api/v1/stats/stations/economies', async (ctx, next) => {
-  const primaryEconomies  = await dbAsync.all(`
+router.get('/api/v2/stats/stations/economies', async (ctx, next) => {
+  const primaryEconomies = await dbAsync.all(`
       SELECT primaryEconomy, COUNT(*) as count FROM stations
         WHERE stationType != 'FleetCarrier'
         GROUP By primaryEconomy
@@ -73,17 +73,17 @@ router.get('/api/v1/stats/stations/economies', async (ctx, next) => {
   const response = {
     primary: {},
     secondary: {},
-    fleetCarriers: fleetCarriers['count'],
+    fleetCarriers: fleetCarriers.count,
     timestamp: new Date().toISOString()
   }
 
-  primaryEconomies.forEach(result => response.primary[result['primaryEconomy']] = result['count'])
-  secondaryEconomies.forEach(result => response.secondary[result['secondaryEconomy']] = result['count'])
+  primaryEconomies.forEach(result => response.primary[result.primaryEconomy] = result.count)
+  secondaryEconomies.forEach(result => response.secondary[result.secondaryEconomy] = result.count)
 
   ctx.body = response
 })
 
-router.get('/api/v1/backup', (ctx, next) => {
+router.get('/api/v2/backup', (ctx, next) => {
   const backups = JSON.parse(fs.readFileSync(path.join(ARDENT_BACKUP_DIR, 'backup.json')))
   const downloads = JSON.parse(fs.readFileSync(path.join(ARDENT_DOWNLOADS_DIR, 'downloads.json')))
 

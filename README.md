@@ -64,13 +64,13 @@ in cases where there is more than one system with the same name.
 
 For example, the following queries are equivalent:
 
-* https://api.ardent-insight.com/v1/system/name/Sol
-* https://api.ardent-insight.com/v1/system/address/10477373803
+* https://api.ardent-insight.com/v2/system/name/Sol
+* https://api.ardent-insight.com/v2/system/address/10477373803
 
 As are these requests:
 
-* https://api.ardent-insight.com/v1/system/name/Sol/stations
-* https://api.ardent-insight.com/v1/system/address/10477373803/stations
+* https://api.ardent-insight.com/v2/system/name/Sol/stations
+* https://api.ardent-insight.com/v2/system/address/10477373803/stations
 
 There are over 1,300 known ambigiously named systems in the database, out of 
 approximately 150,000,000 recorded systems.
@@ -80,11 +80,11 @@ with a similar name.
 
 Examples of queries for ambigiously named systems:
 
-* https://api.ardent-insight.com/v1/system/name/C%20Velorum
-* https://api.ardent-insight.com/v1/system/name/i%20Carinae
-* https://api.ardent-insight.com/v1/system/name/I%20Carinae
-* https://api.ardent-insight.com/v1/system/address/5533856349
-* https://api.ardent-insight.com/v1/search/system/name/C%20Vel
+* https://api.ardent-insight.com/v2/system/name/C%20Velorum
+* https://api.ardent-insight.com/v2/system/name/i%20Carinae
+* https://api.ardent-insight.com/v2/system/name/I%20Carinae
+* https://api.ardent-insight.com/v2/system/address/5533856349
+* https://api.ardent-insight.com/v2/search/system/name/C%20Vel
 
 ## REST API Endpoints
 
@@ -92,13 +92,13 @@ Examples of queries for ambigiously named systems:
 
 Get Ardent API software version.
 
-* https://api.ardent-insight.com/v1/version
+* https://api.ardent-insight.com/v2/version
 
 ### Get statistics
 
 Get statistics for the current databases (updated every 15 minutes).
 
-* https://api.ardent-insight.com/v1/stats
+* https://api.ardent-insight.com/v2/stats
 
 ```
     Star systems: 102,694,411
@@ -113,8 +113,8 @@ Get statistics for the current databases (updated every 15 minutes).
 
 Additional stats endpoints for data related to stations:
 
-* https://api.ardent-industry.com/v1/stats/stations/economies
-* https://api.ardent-industry.com/v1/stats/stations/types
+* https://api.ardent-industry.com/v2/stats/stations/economies
+* https://api.ardent-industry.com/v2/stats/stations/types
 
 ### Get commodities reports
 
@@ -125,7 +125,7 @@ The commodity report excludes market data from Fleet Carriers.
 
 It is updated daily.
 
-* https://api.ardent-insight.com/v1/commodities
+* https://api.ardent-insight.com/v2/commodities
 
 #### Example commodities report
 
@@ -147,18 +147,18 @@ It is updated daily.
 
 Get summary report for a commodity.
 
-* https://api.ardent-insight.com/v1/commodity/name/{commodityName}
+* https://api.ardent-insight.com/v2/commodity/name/{commodityName}
 
-e.g. https://api.ardent-insight.com/v1/commodity/name/gold
+e.g. https://api.ardent-insight.com/v2/commodity/name/gold
 
 #### Get importers for a commodity
 
 Get a list of places importing a commodity - places you can sell to - ordered 
 by the highest price they are willing to pay. Returns best 100 matching results.
 
-* https://api.ardent-insight.com/v1/commodity/name/{commodityName}/imports
+* https://api.ardent-insight.com/v2/commodity/name/{commodityName}/imports
 
-e.g. https://api.ardent-insight.com/v1/commodity/name/gold/imports
+e.g. https://api.ardent-insight.com/v2/commodity/name/gold/imports
 
 ##### Supported query parameters
 
@@ -172,9 +172,9 @@ e.g. https://api.ardent-insight.com/v1/commodity/name/gold/imports
 Get a list of exports of a commodity - places where you can buy from - ordered 
 by the lowest price you can buy it for. Returns best 100 matching results.
 
-* https://api.ardent-insight.com/v1/commodity/name/{commodityName}/exports
+* https://api.ardent-insight.com/v2/commodity/name/{commodityName}/exports
 
-e.g. https://api.ardent-insight.com/v1/commodity/name/gold/exports
+e.g. https://api.ardent-insight.com/v2/commodity/name/gold/exports
 
 ##### Supported query parameters
 
@@ -189,17 +189,17 @@ e.g. https://api.ardent-insight.com/v1/commodity/name/gold/exports
 
 Get information about a system.
 
-* https://api.ardent-insight.com/v1/system/name/{systemName}
+* https://api.ardent-insight.com/v2/system/name/{systemName}
 
-e.g. https://api.ardent-insight.com/v1/system/name/Sol
+e.g. https://api.ardent-insight.com/v2/system/name/Sol
 
 #### Get a list of nearby systems
 
 Returns a list of up to 1000 nearby systems, ordered by distance.
 
-* https://api.ardent-insight.com/v1/system/name/{systemName}/nearby
+* https://api.ardent-insight.com/v2/system/name/{systemName}/nearby
 
-e.g. https://api.ardent-insight.com/v1/system/name/Sol/nearby
+e.g. https://api.ardent-insight.com/v2/system/name/Sol/nearby
 
 ##### Supported query parameters
 
@@ -214,20 +214,20 @@ The location of 20 nearest matching stations will be returned. Results are
 returned in order of distance. A minimum landing pad size for the station can 
 be specified.
 
-* https://api.ardent-insight.com/v1/system/name/{systemName}/nearest/{service}
+* https://api.ardent-insight.com/v2/system/name/{systemName}/nearest/{service}
 
 e.g. You can query for any of these services:
 
-* https://api.ardent-insight.com/v1/system/name/Sol/nearest/interstellar-factors
-* https://api.ardent-insight.com/v1/system/name/Sol/nearest/material-trader
-* https://api.ardent-insight.com/v1/system/name/Sol/nearest/technology-broker
-* https://api.ardent-insight.com/v1/system/name/Sol/nearest/black-market
-* https://api.ardent-insight.com/v1/system/name/Sol/nearest/universal-cartographics
-* https://api.ardent-insight.com/v1/system/name/Sol/nearest/refuel
-* https://api.ardent-insight.com/v1/system/name/Sol/nearest/repair
-* https://api.ardent-insight.com/v1/system/name/Sol/nearest/shipyard
-* https://api.ardent-insight.com/v1/system/name/Sol/nearest/outfitting
-* https://api.ardent-insight.com/v1/system/name/Sol/nearest/search-and-rescue
+* https://api.ardent-insight.com/v2/system/name/Sol/nearest/interstellar-factors
+* https://api.ardent-insight.com/v2/system/name/Sol/nearest/material-trader
+* https://api.ardent-insight.com/v2/system/name/Sol/nearest/technology-broker
+* https://api.ardent-insight.com/v2/system/name/Sol/nearest/black-market
+* https://api.ardent-insight.com/v2/system/name/Sol/nearest/universal-cartographics
+* https://api.ardent-insight.com/v2/system/name/Sol/nearest/refuel
+* https://api.ardent-insight.com/v2/system/name/Sol/nearest/repair
+* https://api.ardent-insight.com/v2/system/name/Sol/nearest/shipyard
+* https://api.ardent-insight.com/v2/system/name/Sol/nearest/outfitting
+* https://api.ardent-insight.com/v2/system/name/Sol/nearest/search-and-rescue
 
 ##### Supported query parameters
 
@@ -237,18 +237,18 @@ e.g. You can query for any of these services:
 
 Returns a list of all known trade orders in a system.
 
-* https://api.ardent-insight.com/v1/system/name/{systemName}/commodities
+* https://api.ardent-insight.com/v2/system/name/{systemName}/commodities
 
-e.g. https://api.ardent-insight.com/v1/system/name/Sol/commodities
+e.g. https://api.ardent-insight.com/v2/system/name/Sol/commodities
 
 #### Get commodities imported by a system
 
 Returns a list of all known commodities imported by a system - places where you 
 can sell to - ordered by name of the commodity.
 
-* https://api.ardent-insight.com/v1/system/name/{systemName}/commodities/imports
+* https://api.ardent-insight.com/v2/system/name/{systemName}/commodities/imports
 
-e.g. https://api.ardent-insight.com/v1/system/name/Sol/commodities/imports
+e.g. https://api.ardent-insight.com/v2/system/name/Sol/commodities/imports
 
 ##### Supported query parameters
 
@@ -262,9 +262,9 @@ e.g. https://api.ardent-insight.com/v1/system/name/Sol/commodities/imports
 Returns a list of all known commodities exported by a system - places where you 
 can buy from - ordered by name of the commodity.
 
-* https://api.ardent-insight.com/v1/system/name/{systemName}/commodities/exports
+* https://api.ardent-insight.com/v2/system/name/{systemName}/commodities/exports
 
-e.g. https://api.ardent-insight.com/v1/system/name/Sol/commodities/exports
+e.g. https://api.ardent-insight.com/v2/system/name/Sol/commodities/exports
 
 ##### Supported query parameters
 
@@ -277,9 +277,9 @@ e.g. https://api.ardent-insight.com/v1/system/name/Sol/commodities/exports
 
 Get all buy/sell orders for a commodity in a system.
 
-* https://api.ardent-insight.com/v1/system/name/{systemName}/commodity/name/{commodityName}
+* https://api.ardent-insight.com/v2/system/name/{systemName}/commodity/name/{commodityName}
 
-e.g. https://api.ardent-insight.com/v1/system/name/Sol/commodity/name/gold
+e.g. https://api.ardent-insight.com/v2/system/name/Sol/commodity/name/gold
 
 ##### Supported query parameters
 
@@ -291,9 +291,9 @@ Get a list of nearby places that importing a commodity close to the specified
 system. Returns the first 1000 results, ordered by the highest price they are 
 willing to pay.
 
-* https://api.ardent-insight.com/v1/system/name/{systemName}/commodity/name/{commodityName}/nearby/imports
+* https://api.ardent-insight.com/v2/system/name/{systemName}/commodity/name/{commodityName}/nearby/imports
 
-e.g. https://api.ardent-insight.com/v1/system/name/Sol/commodity/name/gold/nearby/imports
+e.g. https://api.ardent-insight.com/v2/system/name/Sol/commodity/name/gold/nearby/imports
 
 ##### Supported query parameters
 
@@ -309,9 +309,9 @@ Get a list of nearby places that importing a commodity close to the specified
 system. Returns the first 1000 results, ordered by the lowest price you can buy
 it for.
 
-* https://api.ardent-insight.com/v1/system/name/{systemName}/commodity/name/{commodityName}/nearby/exports
+* https://api.ardent-insight.com/v2/system/name/{systemName}/commodity/name/{commodityName}/nearby/exports
 
-e.g. https://api.ardent-insight.com/v1/system/name/Sol/commodity/name/gold/nearby/exports
+e.g. https://api.ardent-insight.com/v2/system/name/Sol/commodity/name/gold/nearby/exports
 
 ##### Supported query parameters
 
@@ -330,9 +330,9 @@ typically only avalible from a single known market
 
 Support for additional queries by market ID may be added in future.
 
-* https://api.ardent-insight.com/v1/market/{marketId}/commodity/name/{commodityName}
+* https://api.ardent-insight.com/v2/market/{marketId}/commodity/name/{commodityName}
 
-e.g. https://api.ardent-insight.com/v1/market/128106744/commodity/name/lavianbrandy
+e.g. https://api.ardent-insight.com/v2/market/128106744/commodity/name/lavianbrandy
 
 ## Authentication
 

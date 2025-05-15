@@ -50,10 +50,16 @@ const updateGalnetNews = require('./lib/cron-tasks/galnet-news')
   app.use(koaCompress())
   router.get('/api/robots.txt', async (ctx) => {
     ctx.type = 'text/plain'
-    ctx.body = `User-agent: *\nDisallow: /*`
+    ctx.body = 'User-agent: *\nDisallow: /*'
   })
   router.get('/', (ctx) => { ctx.body = printStats() })
   router.get('/api', (ctx) => { ctx.body = printStats() })
+
+  // Redirect all /v1 API routes to the new /v2 routes
+  router.get('/api/v1/:path(.*)', async (ctx, next) => {
+    const newUrl = ctx.request.url.replace(/^\/api\/v1\//, `${ARDENT_API_BASE_URL}/v2/`)
+    ctx.redirect(newUrl)
+  })
 
   app.use(router.routes())
 
@@ -90,13 +96,11 @@ function printStats () {
         'Stations:\n' +
         `* Stations: ${stats?.stations?.stations.toLocaleString()}\n` +
         `* Fleet Carriers: ${stats?.stations?.carriers.toLocaleString()}\n` +
-        `* Station updates in last 24 hours: ${stats?.stations?.updatedInLast24Hours?.toLocaleString()}\n` +
+        `* Updated in last 24 hours: ${stats?.stations?.updatedInLast24Hours?.toLocaleString()}\n` +
         'Trade:\n' +
-        `* Station Markets: ${stats?.trade?.stations?.toLocaleString()}\n` +
-        `* Fleet Carrier Markets: ${stats?.trade?.carriers?.toLocaleString()}\n` +
-        `* Trade systems: ${stats?.trade?.systems?.toLocaleString()}\n` +
-        `* Trade orders: ${stats?.trade?.tradeOrders?.toLocaleString()}\n` +
-        `* Trade updates in last 24 hours: ${stats?.trade?.updatedInLast24Hours?.toLocaleString()}\n` +
+        `* Markets: ${stats?.trade?.markets?.toLocaleString()}\n` +
+        `* Orders: ${stats?.trade?.orders?.toLocaleString()}\n` +
+        `* Updated in last 24 hours: ${stats?.trade?.updatedInLast24Hours?.toLocaleString()}\n` +
         `* Unique commodities: ${stats?.trade?.uniqueCommodities?.toLocaleString()}\n` +
         `Stats last updated: ${stats?.timestamp}`
         : 'Stats not generated yet')

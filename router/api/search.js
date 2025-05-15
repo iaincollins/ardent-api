@@ -1,7 +1,7 @@
 const dbAsync = require('../../lib/db/db-async')
 
 module.exports = (router) => {
-  router.get('/api/v1/search/system/name/:systemName', async (ctx, next) => {
+  router.get('/api/v2/search/system/name/:systemName', async (ctx, next) => {
     const { systemName } = ctx.params
     if (systemName.length < 1) {
       ctx.status = 406
@@ -26,5 +26,19 @@ module.exports = (router) => {
     }
 
     ctx.body = systems
+  })
+
+  router.get('/api/v2/search/station/name/:stationName', async (ctx, next) => {
+    const { stationName } = ctx.params
+    if (stationName.length < 1) {
+      ctx.status = 406
+      ctx.body = {
+        error: 'Station name too short',
+        message: 'Searching by station name requires at least 1 character'
+      }
+      return null
+    }
+    const stations = await dbAsync.all('SELECT * FROM stations.stations WHERE stationType IS NOT NULL AND stationName LIKE @stationName LIMIT 25', { stationName: `${stationName}%` })
+    ctx.body = stations
   })
 }
