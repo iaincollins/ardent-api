@@ -2,6 +2,17 @@ const dbAsync = require('../../lib/db/db-async')
 const NotFoundResponse = require('../../lib/response/not-found')
 
 module.exports = (router) => {
+  // Get info about a specific market
+  router.get('/api/v2/market/:marketId', async (ctx, next) => {
+    const { marketId } = ctx.params
+    const commodities = await dbAsync.get(`
+      SELECT * FROM stations.stations s WHERE s.marketId = @marketId
+      `, { marketId }
+    )
+    if (commodities.length === 0) return NotFoundResponse(ctx, 'Market not found')
+    ctx.body = commodities
+  })
+
   // Get buy/sell orders for commodities at a specific market
   router.get('/api/v2/market/:marketId/commodities', async (ctx, next) => {
     const { marketId } = ctx.params

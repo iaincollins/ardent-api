@@ -13,6 +13,15 @@ const MAX_NEARBY_SYSTEMS_RESULTS = 1000
 const MAX_NEARBY_COMMODITY_RESULTS = 1000
 const MAX_NEARBY_CONTACTS_RESULTS = 20
 
+const COMMODITY_EXPORT_SORT_OPTIONS = {
+  'price': 'c.buyPrice ASC',
+  'distance': 'c.buyPrice ASC',
+}
+const COMMODITY_IMPORT_SORT_OPTIONS = {
+  'price': 'c.sellPrice DESC',
+  'distance': 'c.buyPrice ASC',
+}
+
 module.exports = (router) => {
   router.get('/api/v2/system/:systemIdentiferType/:systemIdentifer', async (ctx, next) => {
     const { systemIdentiferType, systemIdentifer } = ctx.params
@@ -410,10 +419,14 @@ module.exports = (router) => {
       minPrice = 1,
       maxDistance = DEFAULT_NEARBY_SYSTEMS_DISTANCE,
       fleetCarriers = null,
-      maxDaysAgo = DEFAULT_MAX_RESULTS_AGE
+      maxDaysAgo = DEFAULT_MAX_RESULTS_AGE,
+      sort = null
     } = ctx.query
+    
     if (maxDistance > MAX_NEARBY_SYSTEMS_DISTANCE) { maxDistance = MAX_NEARBY_SYSTEMS_DISTANCE }
     maxDistance = parseInt(maxDistance)
+
+    const orderBy = COMMODITY_IMPORT_SORT_OPTIONS[sort] ? COMMODITY_IMPORT_SORT_OPTIONS[sort] : `c.sellPrice DESC`
 
     const filters = [
       `AND (c.demand >= ${parseInt(minVolume)} OR c.demand = 0)`, // Zero is infinite demand
@@ -456,7 +469,7 @@ module.exports = (router) => {
         AND c.updatedAtDay > '${getISODate(`-${maxDaysAgo}`)}'
         AND distance <= @maxDistance
         ${filters.join(' ')}
-      ORDER BY c.sellPrice DESC
+      ORDER BY ${orderBy}
         LIMIT ${MAX_NEARBY_COMMODITY_RESULTS}`, {
       commodityName: commodityName.toLowerCase(),
       systemX,
@@ -480,10 +493,14 @@ module.exports = (router) => {
       maxPrice = null,
       maxDistance = DEFAULT_NEARBY_SYSTEMS_DISTANCE,
       fleetCarriers = null,
-      maxDaysAgo = DEFAULT_MAX_RESULTS_AGE
+      maxDaysAgo = DEFAULT_MAX_RESULTS_AGE,
+      sort = null
     } = ctx.query
+
     if (maxDistance > MAX_NEARBY_SYSTEMS_DISTANCE) { maxDistance = MAX_NEARBY_SYSTEMS_DISTANCE }
     maxDistance = parseInt(maxDistance)
+
+    const orderBy = COMMODITY_EXPORT_SORT_OPTIONS[sort] ? COMMODITY_EXPORT_SORT_OPTIONS[sort] : `c.buyPrice ASC`
 
     const filters = [
       `AND c.stock >= ${parseInt(minVolume)}`
@@ -527,7 +544,7 @@ module.exports = (router) => {
         AND c.updatedAtDay > '${getISODate(`-${maxDaysAgo}`)}'
         AND distance <= @maxDistance
         ${filters.join(' ')}
-      ORDER BY c.buyPrice ASC
+      ORDER BY ${orderBy}
         LIMIT ${MAX_NEARBY_COMMODITY_RESULTS}`, {
       commodityName: commodityName.toLowerCase(),
       systemX,
