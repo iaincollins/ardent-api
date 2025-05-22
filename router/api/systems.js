@@ -15,11 +15,11 @@ const MAX_NEARBY_CONTACTS_RESULTS = 20
 
 const COMMODITY_EXPORT_SORT_OPTIONS = {
   'price': 'c.buyPrice ASC',
-  'distance': 'c.buyPrice ASC',
+  'distance': 'distance ASC',
 }
 const COMMODITY_IMPORT_SORT_OPTIONS = {
   'price': 'c.sellPrice DESC',
-  'distance': 'c.buyPrice ASC',
+  'distance': 'distance ASC',
 }
 
 module.exports = (router) => {
