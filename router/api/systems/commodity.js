@@ -73,7 +73,7 @@ module.exports = (router) => {
     if (maxDistance > MAX_NEARBY_SYSTEMS_DISTANCE) { maxDistance = MAX_NEARBY_SYSTEMS_DISTANCE }
     maxDistance = parseInt(maxDistance)
 
-    const orderBy = COMMODITY_IMPORT_SORT_OPTIONS[sort] ? COMMODITY_IMPORT_SORT_OPTIONS[sort] : 'c.sellPrice DESC'
+    const orderBy = COMMODITY_IMPORT_SORT_OPTIONS[sort] ? COMMODITY_IMPORT_SORT_OPTIONS[sort] : COMMODITY_IMPORT_SORT_OPTIONS.price
 
     const filters = [
       `AND (c.demand >= ${parseInt(minVolume)} OR c.demand = 0)`, // Zero is infinite demand
@@ -111,7 +111,7 @@ module.exports = (router) => {
         ROUND(SQRT(POWER(s.systemX-@systemX,2)+POWER(s.systemY-@systemY,2)+POWER(s.systemZ-@systemZ,2))) AS distance
       FROM stations.stations s 
         LEFT JOIN trade.commodities c ON c.marketId = s.marketId 
-      WHERE c.commodityName = @commodityName COLLATE NOCASE
+      WHERE c.commodityName = @commodityName
         AND s.systemAddress != @systemAddress
         AND c.updatedAtDay > '${getISODate(`-${maxDaysAgo}`)}'
         AND distance <= @maxDistance
@@ -147,7 +147,7 @@ module.exports = (router) => {
     if (maxDistance > MAX_NEARBY_SYSTEMS_DISTANCE) { maxDistance = MAX_NEARBY_SYSTEMS_DISTANCE }
     maxDistance = parseInt(maxDistance)
 
-    const orderBy = COMMODITY_EXPORT_SORT_OPTIONS[sort] ? COMMODITY_EXPORT_SORT_OPTIONS[sort] : 'c.buyPrice ASC'
+    const orderBy = COMMODITY_EXPORT_SORT_OPTIONS[sort] ? COMMODITY_EXPORT_SORT_OPTIONS[sort] : COMMODITY_EXPORT_SORT_OPTIONS.price
 
     const filters = [
       `AND c.stock >= ${parseInt(minVolume)}`
@@ -186,7 +186,7 @@ module.exports = (router) => {
         ROUND(SQRT(POWER(s.systemX-@systemX,2)+POWER(s.systemY-@systemY,2)+POWER(s.systemZ-@systemZ,2))) AS distance
       FROM stations.stations s 
         LEFT JOIN trade.commodities c ON c.marketId = s.marketId 
-      WHERE c.commodityName = @commodityName COLLATE NOCASE
+      WHERE c.commodityName = @commodityName
         AND s.systemAddress != @systemAddress
         AND c.updatedAtDay > '${getISODate(`-${maxDaysAgo}`)}'
         AND distance <= @maxDistance

@@ -199,8 +199,9 @@ module.exports = (router) => {
         c.updatedAt
       FROM stations.stations s
         LEFT JOIN trade.commodities c ON s.marketId = c.marketId 
-      WHERE s.systemAddress = @systemAddress AND s.stationName = @stationName COLLATE NOCASE
-        ORDER BY commodityName ASC`,
+      WHERE s.systemAddress = @systemAddress
+        AND s.stationName = @stationName COLLATE NOCASE
+      ORDER BY commodityName ASC`,
     { systemAddress: system.systemAddress, stationName }
     )
     if (commodities.length === 0) return NotFoundResponse(ctx, 'Market not found')
