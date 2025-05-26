@@ -14,6 +14,8 @@ const routes = {
   news: require('./api/news'),
   commodities: require('./api/commodities'),
   systems: require('./api/systems'),
+  systemsCommodities: require('./api/systems/commodities'),
+  systemsCommodity: require('./api/systems/commodity'),
   markets: require('./api/markets'),
   search: require('./api/search')
 }
@@ -106,6 +108,8 @@ router.get('/api/v2/backup', (ctx, next) => {
 routes.news(router)
 routes.commodities(router)
 routes.systems(router)
+routes.systemsCommodities(router)
+routes.systemsCommodity(router)
 routes.markets(router)
 routes.search(router)
 
