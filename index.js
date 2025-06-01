@@ -48,10 +48,17 @@ const updateGalnetNews = require('./lib/cron-tasks/galnet-news')
   })
 
   app.use(koaCompress())
+
+  // Removing the robots.txt Disallow all config now the trade db and website
+  // have both been optimised. Will restore this if bot traffic seems to be
+  // impacting legitimate traffic again.
+  /*
   router.get('/api/robots.txt', async (ctx) => {
     ctx.type = 'text/plain'
     ctx.body = 'User-agent: *\nDisallow: /*'
   })
+  */
+
   router.get('/', (ctx) => { ctx.body = printStats() })
   router.get('/api', (ctx) => { ctx.body = printStats() })
 
