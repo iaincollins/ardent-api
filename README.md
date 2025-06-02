@@ -22,9 +22,9 @@ The Ardent API provides access to data submitted to the Elite Dangerous Data
 Network and is stored by the 
 [Ardent Collector](https://github.com/iaincollins/ardent-collector/).
 
-The API provides an interface to look up locaiton data for 150,000,000 star systems 
+The API provides an interface to look up location data for 150,000,000 star systems 
 and tracks millions of buy and sell orders for trade commodities sold in stations,
-ports and on fleet carriers throughout the known galaxy.
+ports and on fleet carriers throughout the Elite Dangerous galaxy.
 
 ## About the REST API
 
