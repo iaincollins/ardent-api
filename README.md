@@ -2,7 +2,7 @@
 
 The Ardent API powers [ardent-insight.com](https://ardent-insight.com)
 
-The API is considered fairly stable and no breaking changes are anticipated,
+The API is considered resonably stable and no breaking changes are anticipated,
 but expect evolution of parameters that can be passed and enrichment of
 responses. 
 
@@ -22,8 +22,8 @@ The Ardent API provides access to data submitted to the Elite Dangerous Data
 Network and is stored by the 
 [Ardent Collector](https://github.com/iaincollins/ardent-collector/).
 
-The API provides an interface to look up locaiton data for 100,000,000 star systems and
-tracks millions of buy and sell orders for trade commodities sold in stations,
+The API provides an interface to look up locaiton data for 150,000,000 star systems 
+and tracks millions of buy and sell orders for trade commodities sold in stations,
 ports and on fleet carriers throughout the known galaxy.
 
 ## About the REST API
@@ -51,7 +51,7 @@ fractional value in light seconds (`ls`) to filter results within a system;
 although the approximate distance to the main star for each station is 
 displayed (when known) it is not taken into account.
 
-* As of API version `3.0.0` the commodity `import` and `export` endpoints 
+* As of version `3.0.0` of the code the commodity `import` and `export` endpoints 
 support a `maxDaysAgo` option that defaults to `30` days. This filters out data 
 older than 30 days from results by default, which makes results more relevant 
 and improves response times. You can still request to include older data by 
