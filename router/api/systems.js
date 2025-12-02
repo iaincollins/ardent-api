@@ -75,12 +75,13 @@ module.exports = (router) => {
           stationType = 'Coriolis' OR 
           stationType = 'CraterPort' OR 
           stationType = 'CraterOutpost' OR 
+          stationType = 'Dodec' OR
           stationType = 'FleetCarrier' OR
           stationType = 'MegaShip' OR
           stationType = 'Ocellus' OR 
+          stationType = 'Outpost' OR
           stationType = 'OnFootSettlement' OR
           stationType = 'Orbis' OR
-          stationType = 'Outpost' OR
           stationType = 'PlanetaryConstructionDepot' OR
           stationType = 'SpaceConstructionDepot' OR
           stationType = 'StrongholdCarrier' OR
@@ -102,6 +103,7 @@ module.exports = (router) => {
             stationType = 'AsteroidBase' OR
             stationType = 'Coriolis' OR 
             stationType = 'CraterPort' OR 
+            stationType = 'Dodec' OR
             stationType = 'Ocellus' OR 
             stationType = 'Orbis'
           )
