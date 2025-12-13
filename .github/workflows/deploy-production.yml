@@ -53,6 +53,11 @@ jobs:
         TARGET: "${{ vars.DEPLOY_DIR }}/${{ env.SERVICE_NAME }}"
         EXCLUDE: ".git*, *.md, LICENSE, node_modules/"
         SCRIPT_AFTER: |
+          # Using NVM for Node and NPM version management, so we need to load it
+          export NVM_DIR="$HOME/.nvm"
+          [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+
+          # Install any new dependencies and restart the service
           cd "${{ vars.DEPLOY_DIR }}/${{ env.SERVICE_NAME }}"
           npm install --omit=dev 
           pm2 restart "${{ env.SERVICE_NAME }}" --cron-restart="0 9 * * 4" --log-date-format="YYYY-MM-DD HH:mm Z"
